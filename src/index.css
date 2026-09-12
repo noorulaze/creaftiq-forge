@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    background-color: #0A0A0F;
+    color: #F8F9FA;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #0D1117; }
+  ::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+  /* Selection */
+  ::selection {
+    background-color: rgba(37, 99, 235, 0.25);
+    color: #F8F9FA;
+  }
+
+  /* Focus visible */
+  :focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+  }
+
+  /* Remove focus outline for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer utilities {
+  /* Gradient text */
+  .text-gradient {
+    background: linear-gradient(135deg, #F8F9FA 0%, #9CA3AF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-blue {
+    background: linear-gradient(135deg, #60A5FA 0%, #2563EB 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Subtle noise/grain overlay */
+  .forge-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Blue glow background */
+  .forge-glow-bg {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.12) 0%, transparent 60%),
+      #0A0A0F;
+  }
+
+  /* Shimmer animation for skeleton */
+  .animate-shimmer {
+    background: linear-gradient(90deg, #111827 25%, #1F2937 50%, #111827 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Letter spacing utilities */
+  .tracking-widest2 { letter-spacing: 0.2em; }
+  .tracking-widest3 { letter-spacing: 0.3em; }
+
+  /* Hide scrollbar but keep scroll */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@layer components {
+  /* Forge input */
+  .forge-input {
+    @apply w-full bg-forge-navy border border-forge-border rounded-xl px-4 py-3 text-forge-white placeholder:text-forge-muted focus:outline-none focus:border-forge-blue focus:ring-1 focus:ring-forge-blue/30 transition-all duration-200;
+  }
+
+  /* Forge label */
+  .forge-label {
+    @apply text-xs font-medium tracking-widest uppercase text-forge-muted mb-2 block;
+  }
+
+  /* Section label */
+  .section-label {
+    @apply text-xs font-semibold tracking-widest2 uppercase text-forge-blue mb-1;
+  }
+
+  /* Blueprint section heading */
+  .blueprint-heading {
+    @apply text-lg font-semibold text-forge-white tracking-tight;
+  }
+}
