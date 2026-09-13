@@ -1,9 +1,11 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Compass, Sparkles, Layers, ShieldCheck, Zap } from 'lucide-react'
+import { ArrowRight, Compass, Sparkles, Layers, ShieldCheck, Zap, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/shared'
+import { useAuthStore } from '@/store/useAuthStore'
 import { MountainBackdrop } from './MountainBackdrop'
 import { IdeaToBlueprintAnimation } from './IdeaToBlueprintAnimation'
+
 
 const CONTAINER = {
   hidden: { opacity: 0 },
@@ -20,6 +22,7 @@ const ITEM = {
 
 export function HeroSection() {
   const shouldReduceMotion = useReducedMotion()
+  const { user } = useAuthStore()
 
   return (
     <section className="relative min-h-[92vh] lg:min-h-screen flex items-center overflow-hidden bg-forge-black pt-28 sm:pt-32 pb-20 sm:pb-28">
@@ -30,34 +33,36 @@ export function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
           
           {/* ============================================================ */}
-          {/* Left Column: Editorial Typography & Exact Positioning        */}
+          {/* Left Column: Editorial Manifesto & Call to Action           */}
           {/* ============================================================ */}
           <motion.div
             variants={CONTAINER}
             initial="hidden"
             animate="show"
-            className="lg:col-span-6 flex flex-col text-left"
+            className="lg:col-span-6 text-left"
           >
-            {/* Small Label Pill: CREAFTIQ FORGE */}
-            <motion.div variants={ITEM} className="mb-5">
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-forge-border/80 bg-forge-surface/80 backdrop-blur-md">
-                <span className="w-1.5 h-1.5 rounded-full bg-forge-blue animate-pulse" />
-                <span className="text-2xs font-semibold tracking-widest3 uppercase text-forge-white">
-                  CREAFTIQ FORGE
-                </span>
-                <span className="text-forge-border">/</span>
-                <span className="text-2xs font-mono text-forge-muted">AI CREATIVE WORKSPACE</span>
-              </div>
+            {/* Small Label */}
+            <motion.div variants={ITEM} className="flex items-center gap-2 mb-4">
+              <span className="text-2xs font-mono uppercase tracking-widest3 text-forge-blue font-bold">
+                CREAFTIQ FORGE
+              </span>
+              <span className="text-forge-border">•</span>
+              <span className="text-2xs font-mono uppercase tracking-widest text-forge-muted">
+                INTELLIGENT WORKSPACE
+              </span>
             </motion.div>
 
-            {/* Main Headline: ONE IDEA. ONE INTELLIGENT WORKSPACE. */}
-            <motion.div variants={ITEM}>
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-forge-white uppercase leading-[1.05] mb-6">
-                ONE IDEA. <br />
-                <span className="text-gradient font-light">ONE INTELLIGENT</span> <br />
-                <span className="text-gradient-blue font-bold">WORKSPACE.</span>
-              </h1>
-            </motion.div>
+            {/* Main Headline */}
+            <motion.h1
+              variants={ITEM}
+              className="text-4xl sm:text-6xl lg:text-6.5xl font-black tracking-tight text-forge-white leading-1.08 uppercase mb-6"
+            >
+              ONE IDEA.{' '}
+              <br />
+              <span className="text-gradient-blue">ONE INTELLIGENT</span>{' '}
+              <br />
+              WORKSPACE.
+            </motion.h1>
 
             {/* Supporting Text */}
             <motion.p
@@ -80,16 +85,30 @@ export function HeroSection() {
                   START FORGING
                 </Button>
               </Link>
-              <a href="#process" className="w-full sm:w-auto">
-                <Button
-                  variant="ghost"
-                  size="xl"
-                  icon={<Compass size={14} />}
-                  className="w-full sm:w-auto text-2xs font-medium tracking-widest uppercase text-forge-muted hover:text-forge-white border border-forge-border/60 hover:border-forge-border hover:bg-forge-surface/50"
-                >
-                  EXPLORE THE PROCESS
-                </Button>
-              </a>
+
+              {user ? (
+                <Link to="/my-forges" className="w-full sm:w-auto">
+                  <Button
+                    variant="secondary"
+                    size="xl"
+                    icon={<LayoutDashboard size={14} className="text-forge-blue" />}
+                    className="w-full sm:w-auto text-2xs font-medium tracking-widest uppercase text-forge-white border border-forge-border hover:border-forge-blue hover:bg-forge-surface cursor-pointer"
+                  >
+                    MY FORGES
+                  </Button>
+                </Link>
+              ) : (
+                <a href="#process" className="w-full sm:w-auto">
+                  <Button
+                    variant="ghost"
+                    size="xl"
+                    icon={<Compass size={14} />}
+                    className="w-full sm:w-auto text-2xs font-medium tracking-widest uppercase text-forge-muted hover:text-forge-white border border-forge-border/60 hover:border-forge-border hover:bg-forge-surface/50"
+                  >
+                    EXPLORE THE PROCESS
+                  </Button>
+                </a>
+              )}
             </motion.div>
 
             {/* Studio Vitals Strip */}

@@ -51,20 +51,21 @@ export function Navbar() {
             {user ? (
               <>
                 <Link
-                  to="/dashboard"
+                  to="/my-forges"
                   className="text-2xs font-semibold tracking-widest uppercase text-forge-muted hover:text-forge-white transition-colors"
                 >
-                  DASHBOARD
+                  MY FORGES
                 </Link>
                 <button
                   type="button"
                   onClick={() => logoutUser()}
-                  className="text-2xs font-semibold tracking-widest uppercase text-forge-muted hover:text-red-400 transition-colors"
+                  className="text-2xs font-semibold tracking-widest uppercase text-forge-muted hover:text-red-400 transition-colors cursor-pointer"
                 >
                   SIGN OUT
                 </button>
               </>
             ) : (
+
               <Link
                 to="/login"
                 className="text-2xs font-semibold tracking-widest uppercase text-forge-muted hover:text-forge-white transition-colors"
@@ -127,23 +128,24 @@ export function Navbar() {
               {user ? (
                 <>
                   <Link
-                    to="/dashboard"
+                    to="/my-forges"
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-forge-white py-1"
                   >
                     <LayoutDashboard size={14} className="text-forge-blue" />
-                    <span>DASHBOARD</span>
+                    <span>MY FORGES</span>
                   </Link>
                   <button
                     type="button"
                     onClick={() => { logoutUser(); setMobileOpen(false) }}
-                    className="flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-red-400 py-1 text-left"
+                    className="flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-red-400 py-1 text-left cursor-pointer"
                   >
                     <LogOut size={14} />
                     <span>SIGN OUT</span>
                   </button>
                 </>
               ) : (
+
                 <Link
                   to="/login"
                   onClick={() => setMobileOpen(false)}

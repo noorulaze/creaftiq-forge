@@ -10,6 +10,7 @@ import { LandingPage }       from '@/pages/LandingPage'
 import { LoginPage }         from '@/pages/LoginPage'
 import { RegisterPage }      from '@/pages/RegisterPage'
 import { DashboardPage }     from '@/pages/DashboardPage'
+import { MyForgesPage }      from '@/pages/MyForgesPage'
 import { CreateProjectPage } from '@/pages/CreateProjectPage'
 import { ForgingPage }       from '@/pages/ForgingPage'
 import { IdeaDNAPage }       from '@/pages/IdeaDNAPage'
@@ -52,10 +53,15 @@ export default function App() {
 
         {/* Protected routes */}
         <Route
+          path="/my-forges"
+          element={<ProtectedRoute><MyForgesPage /></ProtectedRoute>}
+        />
+        <Route
           path="/dashboard"
-          element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
+          element={<Navigate to="/my-forges" replace />}
         />
       </Route>
+
 
       {/* Forging page — full screen, no navbar */}
       <Route

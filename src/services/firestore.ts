@@ -337,9 +337,12 @@ export async function deleteProject(
   projectId: string,
   uid?: string,
 ): Promise<void> {
+  let deletedFromFirestore = false
+
   if (uid) {
     try {
       await deleteDoc(doc(db, 'users', uid, 'projects', projectId))
+      deletedFromFirestore = true
     } catch {
       // Continue
     }
@@ -347,13 +350,113 @@ export async function deleteProject(
 
   try {
     await deleteDoc(doc(db, 'projects', projectId))
+    deletedFromFirestore = true
   } catch {
     // Continue
   }
 
   const list = getLocalProjects().filter(x => x.id !== projectId)
   saveLocalProjects(list)
+
+  if (isFirebaseConfigured && uid && !deletedFromFirestore) {
+    throw new Error('Failed to delete project from Firestore.')
+  }
 }
+
+// ─── Duplicate Project ────────────────────────────────────────
+export async function duplicateProject(
+  sourceProjectId: string,
+  uid?: string,
+): Promise<string> {
+  const existing = await getProject(sourceProjectId, uid)
+  if (!existing) {
+    throw new Error('Original project not found.')
+  }
+
+  const duplicatedName = `${existing.name || existing.projectName || 'Project'} (Copy)`
+  const newPayload: Partial<FirestoreProjectDoc> & Record<string, unknown> = {
+    projectName: duplicatedName,
+    originalIdea: existing.idea || existing.originalIdea || '',
+    industry: existing.context?.industry || existing.industry || '',
+    targetAudience: existing.context?.targetAudience || existing.targetAudience || '',
+    mainGoal: existing.context?.mainGoal || existing.mainGoal || '',
+    ideaDNA: existing.ideaDNA || null,
+    brand: existing.brand || null,
+    product: existing.product || null,
+    website: existing.website || null,
+    content: existing.content || null,
+    marketing: existing.marketing || null,
+    roadmap: existing.roadmap || null,
+    creativeDirection: existing.creativeDirection || null,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    status: existing.status || 'complete',
+    uid: uid || existing.uid,
+    name: duplicatedName,
+    idea: existing.idea || existing.originalIdea || '',
+    context: {
+      ...existing.context,
+      name: duplicatedName,
+    },
+  }
+
+  if (uid) {
+    try {
+      const userProjectsRef = collection(db, 'users', uid, 'projects')
+      const ref = await addDoc(userProjectsRef, newPayload)
+      try {
+        await setDoc(doc(db, 'projects', ref.id), { ...newPayload, uid })
+      } catch {
+        // Ignored
+      }
+      return ref.id
+    } catch {
+      // Fallback
+    }
+  }
+
+  const newId = 'proj_' + Date.now()
+  const newProj: Project = {
+    id: newId,
+    uid: uid || existing.uid || 'user_demo_1',
+    name: duplicatedName,
+    idea: existing.idea,
+    context: { ...existing.context, name: duplicatedName },
+    status: existing.status || 'complete',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    projectName: duplicatedName,
+    originalIdea: existing.idea,
+    industry: existing.context?.industry,
+    targetAudience: existing.context?.targetAudience,
+    mainGoal: existing.context?.mainGoal,
+    ideaDNA: existing.ideaDNA,
+    brand: existing.brand,
+    product: existing.product,
+    website: existing.website,
+    content: existing.content,
+    marketing: existing.marketing,
+    roadmap: existing.roadmap,
+    creativeDirection: existing.creativeDirection,
+  }
+  const list = getLocalProjects()
+  list.unshift(newProj)
+  saveLocalProjects(list)
+
+  // Also duplicate outputs in local storage
+  try {
+    const all = JSON.parse(localStorage.getItem(LOCAL_OUTPUTS_KEY) || '{}')
+    if (all[sourceProjectId]) {
+      all[newId] = { ...all[sourceProjectId] }
+      localStorage.setItem(LOCAL_OUTPUTS_KEY, JSON.stringify(all))
+    }
+  } catch {
+    // Ignored
+  }
+
+  return newId
+}
+
 
 // ─── Save Project Blueprint / Outputs ────────────────────────
 export async function saveProjectOutputs(

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, AlertCircle, Zap } from 'lucide-react'
 import { Button } from '@/components/shared'
@@ -27,6 +27,7 @@ function mapAuthError(code: string): string {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const isLogin = mode === 'login'
 
   const [displayName, setDisplayName] = useState('')
@@ -35,6 +36,8 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [showPass, setShowPass]       = useState(false)
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState<string | null>(null)
+
+  const returnPath = (location.state as { from?: { pathname: string } })?.from?.pathname || '/my-forges'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -58,7 +61,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         await registerUser(email, password, displayName)
         toast.success('Account created. Welcome to FORGE.')
       }
-      navigate('/dashboard')
+      navigate(returnPath, { replace: true })
     } catch (err: unknown) {
       const code = (err as { code?: string }).code || ''
       setError(mapAuthError(code))

@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Dna, BookmarkCheck, CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Dna, BookmarkCheck, CheckCircle2, Loader2, AlertCircle, RefreshCw, LayoutDashboard } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+
 
 import { useAuthStore } from '@/store/useAuthStore'
 import { useForgeStore } from '@/store/useForgeStore'
@@ -285,8 +286,17 @@ export function WorkspacePage() {
               </div>
             </div>
 
-            {/* Right: 4-State Save Project Button Matrix (Saving... | Saved successfully | Save failed / Retry) */}
+            {/* Right: My Forges Navigation + 4-State Save Project Button */}
             <div className="flex items-center gap-2.5 flex-shrink-0">
+              <Link
+                to="/my-forges"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase text-forge-muted hover:text-forge-white bg-forge-surface hover:bg-forge-surface2 border border-forge-border transition-colors"
+                title="View All Forges"
+              >
+                <LayoutDashboard size={12} className="text-forge-blue" />
+                <span>MY FORGES</span>
+              </Link>
+
               {saveStatus === 'idle' && (
                 <Button
                   variant="primary"
@@ -298,6 +308,7 @@ export function WorkspacePage() {
                   SAVE PROJECT
                 </Button>
               )}
+
 
               {saveStatus === 'saving' && (
                 <button
