@@ -170,21 +170,69 @@ IDEA DNA: ${JSON.stringify(ideaDna)}`
 export function buildCreativeDirectionPrompt(ideaDna: unknown): string {
   return `${FORGE_CONTEXT}
 
-Generate a visual creative direction as JSON:
+Generate an evocative, visual creative direction moodboard as JSON:
 {
+  "mood": "1 evocative sentence capturing the visual mood and emotional feeling",
   "colorPalette": [
-    { "hex": "#XXXXXX", "name": "COLOR NAME", "role": "Role in the palette" }
+    { "hex": "#XXXXXX", "name": "COLOR NAME", "role": "Role in the palette", "usage": "Specific interface/visual usage" }
   ],
-  "typographyDirection": "3 sentences on typography approach and specific font recommendations",
-  "visualKeywords": ["10 visual direction keywords"],
-  "mood": "1 evocative sentence capturing the brand mood",
-  "imageDirection": "2-3 sentences on photography and visual content direction",
-  "uiDirection": "2-3 sentences on UI/digital design direction",
+  "typographyDirection": "Overview of typographic tone and hierarchy",
+  "typography": {
+    "headingStyle": "Precise font weight, tracking, case, and display style for headlines",
+    "bodyTextStyle": "Font family, line-height, and rhythm for body text",
+    "typographyMood": "Overall typographic feeling (e.g. Disciplined Minimalist, Editorial Modern)",
+    "fontCategories": ["Display Sans", "Geometric Sans", "Technical Mono"]
+  },
+  "imageDirection": "Overview of visual and photographic aesthetic",
+  "imageDetails": {
+    "photographyStyle": "e.g. Documentary realism, high tactile clarity, cinematic depth",
+    "lightingDirection": "e.g. Directional chiaroscuro, natural golden side-light, obsidian shadows",
+    "compositionStyle": "e.g. Architectural rule-of-thirds, disciplined framing, negative space",
+    "subjectDirection": "e.g. Authentic artisans, raw materials, deliberate human focus",
+    "backgroundDirection": "e.g. Matte slate surfaces, textured concrete, deep darkness"
+  },
+  "uiDirection": "Overview of digital UI principles",
+  "uiDetails": {
+    "layoutStyle": "e.g. Monolithic editorial grid with breathing room",
+    "cardStyle": "e.g. Matte slate containers with 1px hairline border dividers",
+    "buttonStyle": "e.g. High-contrast tactile buttons with focused electric blue glow",
+    "spacingDirection": "e.g. 8pt baseline cadence with generous margins",
+    "interactionStyle": "e.g. Responsive spring physics and subtle hover elevation"
+  },
+  "visualKeywords": ["10 evocative visual direction keywords"],
   "brandPersonality": ["6 personality trait words/phrases"]
 }
-Include exactly 5 colors in the palette with actual valid hex codes.
+Include 5 to 6 colors in the palette with actual valid hex codes.
 
 IDEA DNA: ${JSON.stringify(ideaDna)}`
+}
+
+// ─── Generate Creative Image Prompt ───────────────────────────
+export function buildVisualImagePrompt(input: {
+  projectName?: string
+  idea?: string
+  industry?: string
+  targetAudience?: string
+  brandPersonality?: string[]
+  colorPalette?: { name: string; hex: string }[]
+  visualKeywords?: string[]
+  imageDirection?: unknown
+  uiDirection?: unknown
+}): string {
+  const idea = input.idea || 'Creative digital venture'
+  const industry = input.industry ? `in the ${input.industry} domain` : ''
+  const keywords = input.visualKeywords?.slice(0, 8).join(', ') || 'minimal, architectural, editorial'
+  const colors = input.colorPalette?.map(c => `${c.name} (${c.hex})`).join(', ') || 'obsidian void, chalk white, electric blue'
+  const personality = input.brandPersonality?.join(', ') || 'bold, authentic, refined'
+
+  return [
+    `Editorial photography capturing the visual essence of "${input.projectName || 'New Project'}" ${industry}.`,
+    `Core concept: ${idea}.`,
+    `Aesthetic tone: ${personality}. Visual atmosphere: ${keywords}.`,
+    `Color palette guidance: Dominated by ${colors}. High optical contrast, deep shadows, and subtle ambient light streaks.`,
+    `Stylistic direction: Cinematic documentary framing, natural texture, tactile materials (matte stone, dark glass, raw textile), disciplined architectural composition with deliberate negative space.`,
+    `Negative constraints: Strictly no typography, no visible text or letters, no logos, no watermarks, no brand names, no stock photography smiles, no cheesy corporate office poses, no oversaturated plastic 3D renders, no warped artifacts.`
+  ].join(' ')
 }
 
 // ─── Refine Section ───────────────────────────────────────────

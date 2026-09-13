@@ -14,6 +14,7 @@ import type {
   MarketingOutput,
   RoadmapOutput,
   CreativeDirectionOutput,
+  GeneratedCreativeImage,
   ProjectContext,
   ContentPlatform,
   BlueprintSection,
@@ -31,6 +32,7 @@ const generateContentFn        = httpsCallable(fns, 'generateContent')
 const generateMarketingFn      = httpsCallable(fns, 'generateMarketing')
 const generateRoadmapFn        = httpsCallable(fns, 'generateRoadmap')
 const generateCreativeDirectionFn = httpsCallable(fns, 'generateCreativeDirection')
+const generateCreativeImageFn     = httpsCallable(fns, 'generateCreativeImage')
 const refineSectionFn          = httpsCallable(fns, 'refineSection')
 
 // ──────────────────────────────────────────────────────────────
@@ -96,6 +98,22 @@ export async function generateCreativeDirection(
   ideaDna: IdeaDNA,
 ): Promise<CreativeDirectionOutput> {
   return callFn(generateCreativeDirectionFn, { ideaDna }, 'generateCreativeDirection')
+}
+
+export async function generateCreativeImage(
+  params: {
+    projectName?: string
+    idea?: string
+    industry?: string
+    targetAudience?: string
+    brandPersonality?: string[]
+    colorPalette?: { name: string; hex: string }[]
+    visualKeywords?: string[]
+    imageDirection?: unknown
+    uiDirection?: unknown
+  },
+): Promise<GeneratedCreativeImage> {
+  return callFn(generateCreativeImageFn, params, 'generateCreativeImage')
 }
 
 export async function refineSection(

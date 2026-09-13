@@ -4,12 +4,12 @@ import type { BlueprintSection } from '@/types'
 import { cn } from '@/utils/cn'
 
 const PRESETS = [
-  { id: 'more-premium',      label: 'Make it more premium'      },
-  { id: 'more-youthful',     label: 'Make it more youthful'     },
-  { id: 'more-minimal',      label: 'Make it more minimal'      },
-  { id: 'more-bold',         label: 'Make it more bold'         },
-  { id: 'more-professional', label: 'Make it more professional' },
-  { id: 'simplify',          label: 'Simplify'                  },
+  { id: 'more-premium',   label: 'More premium' },
+  { id: 'more-youthful',  label: 'More youthful' },
+  { id: 'more-minimal',   label: 'More minimal' },
+  { id: 'more-bold',      label: 'More bold' },
+  { id: 'more-editorial', label: 'More editorial' },
+  { id: 'more-local',     label: 'More local and culturally connected' },
 ]
 
 interface RefineModalProps {

@@ -173,20 +173,65 @@ export function getClientMockResponse(operation: string, input?: unknown): unkno
 
     case 'generateCreativeDirection':
       return {
+        mood: 'An electric creative laboratory under midnight skies — precision engineering meets high-taste artistic vision.',
         colorPalette: [
-          { hex: '#0A0A0F', name: 'OBSIDIAN VOID', role: 'Primary Canvas' },
-          { hex: '#111827', name: 'CARBON SURFACE', role: 'Elevated Cards & Containers' },
-          { hex: '#2563EB', name: 'ELECTRIC SIGNAL', role: 'Primary Action & Glow Accent' },
-          { hex: '#60A5FA', name: 'ATMOSPHERE BLUE', role: 'Secondary Gradients & Badges' },
-          { hex: '#F8F9FA', name: 'CHALK WHITE', role: 'High-contrast Typography' },
+          { hex: '#0A0A0F', name: 'OBSIDIAN VOID', role: 'Primary Canvas', usage: 'Canvas & Deep Dark Views' },
+          { hex: '#111827', name: 'CARBON SURFACE', role: 'Surface Level 1', usage: 'Elevated Cards & Containers' },
+          { hex: '#2563EB', name: 'ELECTRIC SIGNAL', role: 'Active Glowing Vector', usage: 'Buttons, Active Indicators, Focus Rings' },
+          { hex: '#60A5FA', name: 'ATMOSPHERE BLUE', role: 'Secondary Vector', usage: 'Ambient Highlights & Sub-Accents' },
+          { hex: '#F8F9FA', name: 'CHALK WHITE', role: 'Editorial Headline', usage: 'High-Contrast Typography' },
         ],
         typographyDirection: 'Headlines: High-impact condensed sans with wide tracking. Body: Modern geometric sans (Inter) with generous line-height. Monospace accents in JetBrains Mono.',
-        visualKeywords: ['Obsidian', 'Editorial', 'Precision', 'Architectural', 'Electric', 'Atmospheric', 'Refined', 'Kinetic', 'Bold', 'Minimal'],
-        mood: 'An electric creative laboratory under midnight skies — precision engineering meets high-taste artistic vision.',
+        typography: {
+          headingStyle: 'Condensed Bold Sans (-0.03em tracking, uppercase display weight 900)',
+          bodyTextStyle: 'Modern Geometric Sans (Inter 400/500, generous 1.6 line-height)',
+          typographyMood: 'Disciplined Minimalist & Authoritative Modern',
+          fontCategories: ['Display Condensed Sans', 'Geometric Sans-Serif', 'Technical Monospace'],
+        },
         imageDirection: 'Raw, grainy, high-contrast black-and-white photography punctuated by single electric blue light streaks.',
+        imageDetails: {
+          photographyStyle: 'Documentary realism with tactile clarity and subtle film grain',
+          lightingDirection: 'Directional chiaroscuro with deep obsidian shadows and ambient rim lighting',
+          compositionStyle: 'Disciplined architectural rule-of-thirds with generous negative space',
+          subjectDirection: 'Authentic artisans, focused makers, and real human craft in context',
+          backgroundDirection: 'Matte graphite, textured concrete, dark volcanic stone, and brushed metal',
+        },
         uiDirection: 'Monochrome glassmorphism, subtle micro-borders, 1px luminous highlights, and fluid spring transitions.',
+        uiDetails: {
+          layoutStyle: 'Monolithic modular grid with deliberate breathing room and clear hierarchy',
+          cardStyle: 'Matte slate containers with 1px hairline border dividers and subtle ambient glow',
+          buttonStyle: 'High-contrast tactile buttons with focused electric blue glow vectors',
+          spacingDirection: 'Strict 8pt baseline cadence with generous macro margins (64px–96px)',
+          interactionStyle: 'Snappy spring physics with instant tactile feedback and zero laggy easing',
+        },
+        visualKeywords: ['Obsidian', 'Editorial', 'Precision', 'Architectural', 'Electric', 'Atmospheric', 'Refined', 'Kinetic', 'Bold', 'Minimal'],
         brandPersonality: ['Unyielding Quality', 'Creative Visionary', 'Direct & Honest', 'Relentlessly Forward', 'Cultural Authority'],
       } as CreativeDirectionOutput
+
+    case 'generateCreativeImage': {
+      const data = (input || {}) as Record<string, any>
+      const idea = data.idea || 'Creative Project'
+      const industry = data.industry ? `in the ${data.industry} space` : ''
+      const keywords = Array.isArray(data.visualKeywords) ? data.visualKeywords.slice(0, 6).join(', ') : 'architectural, minimalist, electric'
+      const colors = Array.isArray(data.colorPalette) ? data.colorPalette.map((c: any) => `${c.name} (${c.hex})`).join(', ') : 'Obsidian Void (#0A0A0F), Chalk White (#F8F9FA), Electric Signal (#2563EB)'
+      const personality = Array.isArray(data.brandPersonality) ? data.brandPersonality.join(', ') : 'bold, authentic, forward-thinking'
+
+      const visualPrompt = [
+        `Atmospheric high-taste editorial photograph representing "${data.projectName || 'New Project'}" ${industry}.`,
+        `Core concept: ${idea}.`,
+        `Aesthetic mood: ${personality}. Visual atmosphere: ${keywords}.`,
+        `Color direction: Anchored by ${colors}. High optical contrast, deep obsidian shadows, and subtle ambient blue streaks.`,
+        `Stylistic direction: Cinematic documentary framing, tactile textures (matte stone, dark glass, brushed metal), natural directional chiaroscuro lighting, disciplined architectural composition with generous negative space.`,
+        `Negative constraints: Strictly no typography, no visible letters or text, no logos, no watermarks, no brand names, no stock photo smiles, no cheesy corporate office poses, no oversaturated plastic 3D renders, no warped artifacts.`
+      ].join(' ')
+
+      return {
+        status: 'not_configured',
+        prompt: visualPrompt,
+        createdAt: new Date().toISOString(),
+        errorMessage: 'Image generation provider is not configured. Configure IMAGEN_API_KEY or IMAGE_GENERATION_KEY in Firebase Cloud Functions (or .env.local) to render live images. Your tailored visual prompt has been engineered below.',
+      }
+    }
 
     case 'refineSection':
       return (input as Record<string, unknown>)?.currentContent || {}

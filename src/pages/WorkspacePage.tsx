@@ -156,12 +156,26 @@ export function WorkspacePage() {
         updatedData.valueProposition = `${current.valueProposition || ''} [Adjusted: ${instruction}]`
       } else if (section === 'marketing') {
         updatedData.launchStrategy = `${current.launchStrategy || ''} [Focus: ${instruction}]`
+      } else if (section === 'creativeDirection') {
+        updatedData.mood = `${current.mood || ''} [Refined: ${instruction}]`
+        const cleanTag = instruction.replace(/^More\s+/i, '').trim()
+        if (cleanTag && Array.isArray(updatedData.visualKeywords)) {
+          if (!updatedData.visualKeywords.includes(cleanTag)) {
+            updatedData.visualKeywords = [cleanTag, ...updatedData.visualKeywords]
+          }
+        }
       }
 
       const update = { [section]: updatedData } as Partial<ProjectOutputs>
       updateOutputs(update)
-      await saveProjectOutputs(projectId, update)
-      toast.success(`${section.toUpperCase()} refined locally.`)
+      await saveProjectOutputs(projectId, update, user?.uid, {
+        projectName: project?.name,
+        originalIdea: project?.idea,
+        industry: project?.context?.industry,
+        targetAudience: project?.context?.targetAudience,
+        mainGoal: project?.context?.mainGoal,
+      })
+      toast.success(`${section === 'creativeDirection' ? 'Creative Direction' : section.toUpperCase()} refined.`)
       setRefineOpen(false)
     } catch {
       toast.error('Refinement failed.')
@@ -468,10 +482,31 @@ export function WorkspacePage() {
               {activeTab === 'creativeDirection' && (
                 <CreativeBoard
                   creativeDirection={outputs?.creativeDirection || null}
+                  projectContext={{
+                    name: project?.name,
+                    idea: project?.idea,
+                    industry: project?.context?.industry,
+                    targetAudience: project?.context?.targetAudience,
+                    mainGoal: project?.context?.mainGoal,
+                    ideaDna: outputs?.ideaDna,
+                    brand: outputs?.brand,
+                  }}
                   loading={outputsLoading}
                   onRefine={() => handleOpenRefine('creativeDirection')}
                   onRegenerate={() => handleRegenerateSection('creativeDirection')}
                   onSave={handleSaveProject}
+                  onUpdateCreativeDirection={async (updatedCd) => {
+                    if (!projectId || !currentOutputs) return
+                    const update: Partial<ProjectOutputs> = { creativeDirection: updatedCd }
+                    updateOutputs(update)
+                    await saveProjectOutputs(projectId, update, user?.uid, {
+                      projectName: project?.name,
+                      originalIdea: project?.idea,
+                      industry: project?.context?.industry,
+                      targetAudience: project?.context?.targetAudience,
+                      mainGoal: project?.context?.mainGoal,
+                    })
+                  }}
                 />
               )}
             </motion.div>

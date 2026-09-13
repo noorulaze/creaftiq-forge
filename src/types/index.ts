@@ -236,16 +236,55 @@ export interface ColorSwatch {
   hex: string
   name: string
   role: string
+  usage?: string
+}
+
+export interface TypographyDirectionDetails {
+  headingStyle: string
+  bodyTextStyle: string
+  typographyMood: string
+  fontCategories: string[]
+  description?: string
+}
+
+export interface ImageDirectionDetails {
+  photographyStyle: string
+  lightingDirection: string
+  compositionStyle: string
+  subjectDirection: string
+  backgroundDirection: string
+  summary?: string
+}
+
+export interface UIDirectionDetails {
+  layoutStyle: string
+  cardStyle: string
+  buttonStyle: string
+  spacingDirection: string
+  interactionStyle: string
+  summary?: string
+}
+
+export interface GeneratedCreativeImage {
+  url?: string
+  prompt: string
+  createdAt?: string
+  status: 'idle' | 'generating' | 'ready' | 'not_configured' | 'error'
+  errorMessage?: string
 }
 
 export interface CreativeDirectionOutput {
   colorPalette: ColorSwatch[]
-  typographyDirection: string
+  typographyDirection: string | TypographyDirectionDetails
   visualKeywords: string[]
   mood: string
-  imageDirection: string
-  uiDirection: string
+  imageDirection: string | ImageDirectionDetails
+  uiDirection: string | UIDirectionDetails
   brandPersonality: string[]
+  typography?: TypographyDirectionDetails
+  imageDetails?: ImageDirectionDetails
+  uiDetails?: UIDirectionDetails
+  generatedImage?: GeneratedCreativeImage
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -281,6 +320,8 @@ export type RefinePreset =
   | 'more-youthful'
   | 'more-minimal'
   | 'more-bold'
+  | 'more-editorial'
+  | 'more-local'
   | 'more-professional'
   | 'simplify'
   | string
