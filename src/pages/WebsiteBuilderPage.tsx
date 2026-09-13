@@ -14,6 +14,13 @@ import {
   FileCode,
   Terminal,
   Info,
+  Eye,
+  Edit3,
+  Save,
+  Monitor,
+  Smartphone,
+  Sliders,
+  Undo2,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useForgeStore } from '@/store/useForgeStore'
@@ -99,6 +106,15 @@ export function WebsiteBuilderPage() {
   const [compiledSpec, setCompiledSpec] = useState<WebsiteBuilderRequest | null>(null)
   const [copied, setCopied] = useState(false)
 
+  // Interactive Live Preview & Edit Mode State
+  const [previewViewport, setPreviewViewport] = useState<'desktop' | 'mobile'>('desktop')
+  const [isEditingWebsite, setIsEditingWebsite] = useState(false)
+  const [activePreviewPage, setActivePreviewPage] = useState('Home')
+  const [editableHeroHeadline, setEditableHeroHeadline] = useState('')
+  const [editableHeroSubhead, setEditableHeroSubhead] = useState('')
+  const [editableCtaLabel, setEditableCtaLabel] = useState('')
+  const [isSavingWebsite, setIsSavingWebsite] = useState(false)
+
   // Hydrate Project & Context
   useEffect(() => {
     if (!projectIdParam) {
@@ -170,9 +186,15 @@ export function WebsiteBuilderPage() {
             const parsed = JSON.parse(savedSpec)
             setCompiledSpec(parsed)
             if (parsed.websiteType) setWebsiteType(parsed.websiteType)
-            if (parsed.selectedPages) setSelectedPages(parsed.selectedPages)
+            if (parsed.selectedPages) {
+              setSelectedPages(parsed.selectedPages)
+              if (parsed.selectedPages.length > 0) setActivePreviewPage(parsed.selectedPages[0])
+            }
             if (parsed.visualStyle) setVisualStyle(parsed.visualStyle)
-            if (parsed.primaryCTA) setPrimaryCTA(parsed.primaryCTA)
+            if (parsed.primaryCTA) {
+              setPrimaryCTA(parsed.primaryCTA)
+              setEditableCtaLabel(parsed.primaryCTA)
+            }
             if (parsed.extraInstructions) setExtraInstructions(parsed.extraInstructions)
           }
         } catch {
@@ -268,11 +290,40 @@ export function WebsiteBuilderPage() {
       await saveWebsiteBuilderRequest(projectIdParam || 'proj_active', requestPayload, user?.uid)
 
       setCompiledSpec(requestPayload)
+      setEditableHeroHeadline(project?.name ? `${project.name.toUpperCase()} — DIGITAL MANIFESTO` : 'DIGITAL ARCHITECTURE & LAUNCH MANIFESTO')
+      setEditableHeroSubhead(project?.idea || outputs?.ideaDna?.purpose || 'An intelligent digital craft experience engineered for high-signal audiences.')
+      setEditableCtaLabel(primaryCTA.trim())
       toast.success('Website Blueprint Specification successfully generated!')
     } catch {
       toast.error('Failed to save website specification. Please retry.')
     } finally {
       setGenerating(false)
+    }
+  }
+
+  // Handle Saving Edited Website Content
+  async function handleSaveEditedWebsite() {
+    if (!compiledSpec || !projectIdParam) return
+    setIsSavingWebsite(true)
+    try {
+      const updatedSpec: WebsiteBuilderRequest = {
+        ...compiledSpec,
+        primaryCTA: editableCtaLabel.trim() || compiledSpec.primaryCTA,
+        extraInstructions: [
+          compiledSpec.extraInstructions || '',
+          `[Custom Edit] Hero Headline: "${editableHeroHeadline}"`,
+          `[Custom Edit] Hero Subhead: "${editableHeroSubhead}"`,
+        ].filter(Boolean).join('\n'),
+      }
+
+      await saveWebsiteBuilderRequest(projectIdParam, updatedSpec, user?.uid)
+      setCompiledSpec(updatedSpec)
+      setIsEditingWebsite(false)
+      toast.success('Website customizations saved to Firestore.')
+    } catch {
+      toast.error('Failed to save website edits. Please try again.')
+    } finally {
+      setIsSavingWebsite(false)
     }
   }
 
@@ -710,6 +761,285 @@ export function WebsiteBuilderPage() {
               </pre>
             </div>
 
+            {/* ============================================================ */}
+            {/* Live Interactive Website Preview & Inline Editor Mode         */}
+            {/* ============================================================ */}
+            <div className="rounded-2xl border border-forge-border bg-forge-black overflow-hidden shadow-2xl space-y-0">
+              
+              {/* Browser Window Chrome & Controls */}
+              <div className="bg-forge-surface px-4 py-3 border-b border-forge-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-3xs font-mono text-forge-muted uppercase tracking-wider">LIVE WEBSITE PREVIEW</span>
+                    <span className="text-3xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      INTERACTIVE
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                  {/* Viewport Toggles: Desktop vs Mobile */}
+                  <div className="flex items-center gap-1 bg-forge-navy/80 p-1 rounded-lg border border-forge-border text-2xs">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewViewport('desktop')}
+                      className={`px-2.5 py-1 rounded flex items-center gap-1 cursor-pointer transition-colors ${
+                        previewViewport === 'desktop'
+                          ? 'bg-forge-blue text-white font-bold'
+                          : 'text-forge-muted hover:text-forge-white'
+                      }`}
+                      title="1440px Desktop View"
+                    >
+                      <Monitor size={12} />
+                      <span className="hidden md:inline">DESKTOP</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewViewport('mobile')}
+                      className={`px-2.5 py-1 rounded flex items-center gap-1 cursor-pointer transition-colors ${
+                        previewViewport === 'mobile'
+                          ? 'bg-forge-blue text-white font-bold'
+                          : 'text-forge-muted hover:text-forge-white'
+                      }`}
+                      title="390px Mobile View"
+                    >
+                      <Smartphone size={12} />
+                      <span className="hidden md:inline">MOBILE</span>
+                    </button>
+                  </div>
+
+                  {/* Edit Website Toggle & Save Action */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingWebsite(prev => !prev)}
+                      className={`px-3 py-1.5 rounded-lg text-2xs font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                        isEditingWebsite
+                          ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                          : 'bg-forge-surface2 border-forge-border text-forge-muted hover:text-forge-white'
+                      }`}
+                    >
+                      <Edit3 size={12} />
+                      <span>{isEditingWebsite ? 'VIEWING EDIT MODE' : 'EDIT WEBSITE'}</span>
+                    </button>
+
+                    {isEditingWebsite && (
+                      <button
+                        type="button"
+                        onClick={handleSaveEditedWebsite}
+                        disabled={isSavingWebsite}
+                        className="px-3 py-1.5 rounded-lg text-2xs font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                      >
+                        <Save size={12} />
+                        <span>{isSavingWebsite ? 'SAVING...' : 'SAVE WEBSITE'}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Simulated Browser URL bar & Page Navigation Switcher */}
+              <div className="bg-forge-navy/90 px-4 py-2 border-b border-forge-border/60 flex flex-wrap items-center justify-between gap-3 text-3xs font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400">https://</span>
+                  <span className="text-forge-white truncate font-medium">
+                    {projectName.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'forge-site'}.creaftiq.com
+                  </span>
+                  <span className="text-forge-muted">/{activePreviewPage.toLowerCase().replace(/\s+/g, '-')}</span>
+                </div>
+
+                {/* Page Navigation Switcher */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-forge-muted uppercase">PAGES:</span>
+                  {compiledSpec.selectedPages.map(pageName => (
+                    <button
+                      key={pageName}
+                      type="button"
+                      onClick={() => setActivePreviewPage(pageName)}
+                      className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                        activePreviewPage === pageName
+                          ? 'bg-forge-blue text-white font-bold'
+                          : 'bg-forge-surface text-forge-muted hover:text-forge-white'
+                      }`}
+                    >
+                      {pageName}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Live Web Canvas Frame */}
+              <div className={`mx-auto transition-all p-6 sm:p-10 ${
+                previewViewport === 'mobile'
+                  ? 'max-w-[390px] border-x border-forge-border/80 bg-gradient-to-b from-[#0B0F19] to-black min-h-[500px]'
+                  : 'w-full bg-gradient-to-b from-[#0A0D14] via-[#0B0F19] to-black min-h-[520px]'
+              }`}>
+                
+                {/* Navbar Wireframe Component */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-8">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-forge-blue flex items-center justify-center font-mono text-white text-xs font-bold">
+                      {projectName.charAt(0) || 'F'}
+                    </div>
+                    <span className="text-xs font-mono font-bold text-forge-white uppercase tracking-wider">
+                      {projectName}
+                    </span>
+                  </div>
+
+                  <div className="hidden sm:flex items-center gap-4 text-3xs font-mono uppercase text-forge-muted">
+                    {compiledSpec.selectedPages.slice(0, 4).map(p => (
+                      <span
+                        key={p}
+                        onClick={() => setActivePreviewPage(p)}
+                        className={`cursor-pointer hover:text-forge-white ${activePreviewPage === p ? 'text-forge-blue font-bold' : ''}`}
+                      >
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 rounded-lg bg-forge-blue text-white text-3xs font-mono font-bold uppercase tracking-wider shadow-blue-glow-sm"
+                  >
+                    {isEditingWebsite ? editableCtaLabel : compiledSpec.primaryCTA}
+                  </button>
+                </div>
+
+                {/* Main Content Area Based on Active Page */}
+                {activePreviewPage === 'Home' ? (
+                  <div className="space-y-10">
+                    {/* Hero Section */}
+                    <div className="space-y-4 max-w-2xl text-left">
+                      <div className="inline-flex items-center gap-2 text-3xs font-mono uppercase tracking-widest text-forge-blue bg-forge-blue/10 border border-forge-blue/20 px-2.5 py-0.5 rounded-full">
+                        <span>{compiledSpec.visualStyle} AESTHETIC</span>
+                        <span>•</span>
+                        <span>{compiledSpec.websiteType}</span>
+                      </div>
+
+                      {isEditingWebsite ? (
+                        <div className="space-y-3 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
+                          <label className="text-3xs font-mono uppercase text-amber-300 block">Edit Hero Headline</label>
+                          <input
+                            type="text"
+                            value={editableHeroHeadline}
+                            onChange={e => setEditableHeroHeadline(e.target.value)}
+                            className="w-full bg-forge-black border border-forge-border rounded-lg p-2 text-sm text-forge-white focus:outline-none focus:border-forge-blue"
+                          />
+                          <label className="text-3xs font-mono uppercase text-amber-300 block pt-1">Edit Subheading / Manifesto</label>
+                          <textarea
+                            rows={2}
+                            value={editableHeroSubhead}
+                            onChange={e => setEditableHeroSubhead(e.target.value)}
+                            className="w-full bg-forge-black border border-forge-border rounded-lg p-2 text-xs text-forge-white focus:outline-none focus:border-forge-blue resize-none"
+                          />
+                          <label className="text-3xs font-mono uppercase text-amber-300 block pt-1">Edit Primary CTA Button</label>
+                          <input
+                            type="text"
+                            value={editableCtaLabel}
+                            onChange={e => setEditableCtaLabel(e.target.value)}
+                            className="w-full bg-forge-black border border-forge-border rounded-lg p-2 text-xs text-forge-white focus:outline-none focus:border-forge-blue"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <h2 className="text-2xl sm:text-4xl font-extrabold text-forge-white uppercase tracking-tight leading-tight">
+                            {editableHeroHeadline || `${projectName.toUpperCase()} — DIGITAL MANIFESTO`}
+                          </h2>
+                          <p className="text-xs sm:text-sm text-forge-muted font-light leading-relaxed">
+                            {editableHeroSubhead || originalIdea || 'An intelligent digital craft experience engineered for high-signal audiences.'}
+                          </p>
+                        </>
+                      )}
+
+                      <div className="flex items-center gap-3 pt-2">
+                        <button
+                          type="button"
+                          className="px-5 py-2.5 rounded-xl bg-forge-blue hover:bg-forge-blue-light text-white text-xs font-bold uppercase tracking-wider shadow-blue-glow cursor-pointer transition-all"
+                        >
+                          {isEditingWebsite ? editableCtaLabel : compiledSpec.primaryCTA}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActivePreviewPage(compiledSpec.selectedPages[1] || 'About')}
+                          className="px-4 py-2.5 rounded-xl border border-forge-border hover:border-forge-muted text-forge-muted hover:text-forge-white text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer"
+                        >
+                          EXPLORE {compiledSpec.selectedPages[1] || 'ABOUT'} →
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Feature Cards Matrix */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/5">
+                      <div className="p-4 rounded-xl border border-forge-border/80 bg-forge-surface/60 space-y-2">
+                        <div className="w-6 h-6 rounded-lg bg-forge-blue/20 flex items-center justify-center text-forge-blue text-xs font-bold">01</div>
+                        <h4 className="text-xs font-bold text-forge-white uppercase tracking-wider">Concept Authority</h4>
+                        <p className="text-3xs text-forge-muted font-light leading-relaxed">
+                          Anchored by {targetAudience} market alignment and strategic differentiation.
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-xl border border-forge-border/80 bg-forge-surface/60 space-y-2">
+                        <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">02</div>
+                        <h4 className="text-xs font-bold text-forge-white uppercase tracking-wider">Digital Architecture</h4>
+                        <p className="text-3xs text-forge-muted font-light leading-relaxed">
+                          {compiledSpec.selectedPages.length} verified pages with fluid responsiveness.
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-xl border border-forge-border/80 bg-forge-surface/60 space-y-2">
+                        <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs font-bold">03</div>
+                        <h4 className="text-xs font-bold text-forge-white uppercase tracking-wider">Conversion Focus</h4>
+                        <p className="text-3xs text-forge-muted font-light leading-relaxed">
+                          Actionable CTA funnel leading into project milestones and client capture.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Secondary Page Mock Preview */
+                  <div className="space-y-6 text-left py-8">
+                    <span className="text-3xs font-mono text-forge-blue uppercase tracking-widest">
+                      {compiledSpec.websiteType} • SECTION VIEW
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-forge-white uppercase tracking-tight">
+                      {activePreviewPage}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-forge-muted font-light max-w-xl leading-relaxed">
+                      This is the simulated digital layout for the <strong className="text-forge-white">{activePreviewPage}</strong> page of <strong className="text-forge-white">{projectName}</strong>, styled under the {compiledSpec.visualStyle} design doctrine.
+                    </p>
+                    <div className="p-4 rounded-xl border border-forge-border bg-forge-surface/50 max-w-lg space-y-2">
+                      <span className="text-3xs font-mono uppercase text-forge-muted">SPECIFIED TARGET GOAL</span>
+                      <p className="text-xs text-forge-white/90">{mainGoal}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActivePreviewPage('Home')}
+                      className="inline-flex items-center gap-1.5 text-2xs font-mono text-forge-blue hover:underline cursor-pointer"
+                    >
+                      ← RETURN TO HOMEPAGE PREVIEW
+                    </button>
+                  </div>
+                )}
+
+                {/* Footer Wireframe Component */}
+                <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-3xs font-mono text-forge-muted">
+                  <span>© {new Date().getFullYear()} {projectName}. ALL RIGHTS RESERVED.</span>
+                  <div className="flex gap-3 uppercase">
+                    <span>PRIVACY</span>
+                    <span>TERMS</span>
+                    <span>SECURITY</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
             {/* Next Steps Roadmap */}
             <div className="rounded-xl border border-forge-border bg-forge-surface/60 p-5 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-forge-white uppercase tracking-wider">
@@ -717,7 +1047,7 @@ export function WebsiteBuilderPage() {
                 <span>Next Steps in the Production Pipeline</span>
               </div>
               <p className="text-2xs text-forge-muted font-light leading-relaxed">
-                This specification has been safely attached to your project. Next, the Forge Code Generation Agent converts this architecture into a production React + Tailwind codebase, generating component trees, routes, SEO metadata, and ready-to-deploy static assets.
+                This specification has been safely attached to your project in Firestore. Next, the Forge Code Generation Agent converts this architecture into a production React + Tailwind codebase, generating component trees, routes, SEO metadata, and ready-to-deploy static assets.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-2xs">
                 <div className="p-3 rounded-lg border border-forge-border bg-forge-navy/60">
