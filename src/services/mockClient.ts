@@ -233,6 +233,64 @@ export function getClientMockResponse(operation: string, input?: unknown): unkno
       }
     }
 
+    case 'generateCreativeVideo': {
+      const data = (input || {}) as Record<string, any>
+      const idea = data.idea || 'Creative launch project'
+      const projectName = data.projectName || 'Forge'
+      const videoType = data.videoType || 'Cinematic Concept'
+      const duration = data.duration || '15 seconds'
+      const format = data.format || '16:9 Landscape'
+      const style = data.style || 'Cinematic'
+
+      return {
+        title: `${projectName} — ${videoType}`,
+        concept: `An atmospheric visual narrative exploring the genesis of ${projectName}, contrasting raw obsidian tactile textures with electric blue pulses of digital clarity and purposeful momentum.`,
+        duration,
+        aspectRatio: format,
+        visualStyle: style,
+        voiceover: data.voiceoverText || 'Every breakthrough begins in the dark. Raw ideas, tempered with precision, forged into a clear digital direction.',
+        musicMood: data.musicMood || 'Deep ambient sub-bass swelling into a crisp, rhythmic electronic pulse with warm analog distortion and tape saturation.',
+        scenes: [
+          {
+            sceneNumber: 1,
+            time: '0:00 - 0:03',
+            visual: 'Extreme macro close-up on dark obsidian textured surface. A single razor-sharp streak of electric blue vector light cuts through the darkness.',
+            cameraMovement: 'Slow tracking push-in with shallow depth of field (f/1.4)',
+            transition: 'Match cut on vector contour',
+            onScreenText: projectName.toUpperCase(),
+          },
+          {
+            sceneNumber: 2,
+            time: '0:03 - 0:07',
+            visual: 'A focused creator in a disciplined workspace, drafting geometric blueprints and creative tokens illuminated only by cool monitor luminance.',
+            cameraMovement: 'Low angle steady cam slowly drifting right',
+            transition: 'Quick cut on tactile motion',
+            onScreenText: 'ENGINEERED WITH INTENT',
+          },
+          {
+            sceneNumber: 3,
+            time: '0:07 - 0:11',
+            visual: 'Dynamic interface components, color swatches, and typographic specimen cards floating and locking seamlessly into a disciplined modular grid.',
+            cameraMovement: 'Smooth cinematic orbit with gentle tilt',
+            transition: 'Whip pan to horizon',
+            onScreenText: 'A CLEAR DIGITAL DIRECTION',
+          },
+          {
+            sceneNumber: 4,
+            time: '0:11 - 0:15',
+            visual: 'Wide cinematic horizon under midnight skies; an electric blue contour sweeps across distant mountain ridges, signaling the live launch.',
+            cameraMovement: 'Slow crane pull-back revealing endless sky',
+            transition: 'Fade to black with glowing vector mark',
+            onScreenText: 'CREAFTIQ FORGE',
+          },
+        ],
+        finalVideoPrompt: `Cinematic 35mm film footage, 24fps, high optical contrast, ${style} visual style. Macro shots of obsidian textures and glowing electric blue vector contour lines. Architectural workspace framing, natural directional chiaroscuro lighting, subtle film grain. Slow deliberate camera push-in. Strictly no distorted limbs, no generic stock video actors smiling, no plastic 3D renders, no watermarks, no warped letters.`,
+        status: 'not_configured',
+        createdAt: new Date().toISOString(),
+        errorMessage: 'AI Video rendering engine is not configured. Configure VIDEO_GENERATION_KEY in Firebase Cloud Functions to render live MP4 video streams. Your complete scene storyboard and master prompt have been generated below.',
+      }
+    }
+
     case 'refineSection':
       return (input as Record<string, unknown>)?.currentContent || {}
 

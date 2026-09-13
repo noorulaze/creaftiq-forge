@@ -15,6 +15,8 @@ import type {
   RoadmapOutput,
   CreativeDirectionOutput,
   GeneratedCreativeImage,
+  VideoGenerationInput,
+  VideoGenerationOutput,
   ProjectContext,
   ContentPlatform,
   BlueprintSection,
@@ -33,6 +35,7 @@ const generateMarketingFn      = httpsCallable(fns, 'generateMarketing')
 const generateRoadmapFn        = httpsCallable(fns, 'generateRoadmap')
 const generateCreativeDirectionFn = httpsCallable(fns, 'generateCreativeDirection')
 const generateCreativeImageFn     = httpsCallable(fns, 'generateCreativeImage')
+const generateCreativeVideoFn     = httpsCallable(fns, 'generateCreativeVideo')
 const refineSectionFn          = httpsCallable(fns, 'refineSection')
 
 // ──────────────────────────────────────────────────────────────
@@ -114,6 +117,12 @@ export async function generateCreativeImage(
   },
 ): Promise<GeneratedCreativeImage> {
   return callFn(generateCreativeImageFn, params, 'generateCreativeImage')
+}
+
+export async function generateCreativeVideo(
+  params: VideoGenerationInput,
+): Promise<VideoGenerationOutput> {
+  return callFn(generateCreativeVideoFn, params, 'generateCreativeVideo')
 }
 
 export async function refineSection(

@@ -258,3 +258,69 @@ ${JSON.stringify(currentContent)}
 
 Return ONLY the refined JSON object with the same structure.`
 }
+
+// ─── Generate Video Storyboard & Concept Prompt ───────────────
+export function buildVideoStoryboardPrompt(input: {
+  videoType: string
+  duration: string
+  format: string
+  style: string
+  voiceoverText?: string
+  musicMood?: string
+  visualInstruction?: string
+  projectName?: string
+  idea?: string
+  industry?: string
+  targetAudience?: string
+  brandPersonality?: string[]
+  visualKeywords?: string[]
+  colorPalette?: unknown
+  mood?: string
+}): string {
+  return `${FORGE_CONTEXT}
+
+You are a world-class creative video director and cinematographer.
+Generate a structured video concept and scene-by-scene storyboard for this project.
+
+VIDEO SPECIFICATIONS:
+- Video Type: ${input.videoType}
+- Target Duration: ${input.duration}
+- Aspect Ratio / Format: ${input.format}
+- Visual Style: ${input.style}
+- User Voiceover Guidance: ${input.voiceoverText || 'None provided. Generate an authentic, punchy voiceover narrative.'}
+- User Music Mood Guidance: ${input.musicMood || 'None provided. Suggest a compelling cinematic soundscape.'}
+- User Specific Instructions: ${input.visualInstruction || 'Follow project brand aesthetic.'}
+
+PROJECT CONTEXT:
+- Project Name: ${input.projectName || 'Forge Project'}
+- Original Idea: ${input.idea || 'Creative launch project'}
+- Industry: ${input.industry || 'Creative'}
+- Target Audience: ${input.targetAudience || 'Modern discerning creators'}
+- Brand Personality: ${input.brandPersonality?.join(', ') || 'Bold, Authentic, Refined'}
+- Visual Keywords: ${input.visualKeywords?.join(', ') || 'Atmospheric, Minimal, Cinematic'}
+- Atmosphere & Mood: ${input.mood || 'High taste, deep shadows, electric vector highlights'}
+
+Return ONLY valid JSON matching this EXACT structure:
+{
+  "title": "Evocative title for this video piece",
+  "concept": "2-3 sentences explaining the overarching narrative idea, hook, and climax",
+  "duration": "${input.duration}",
+  "aspectRatio": "${input.format}",
+  "visualStyle": "${input.style}",
+  "voiceover": "Complete script for the voiceover matching the exact duration pacing",
+  "musicMood": "Detailed audio direction and music composition notes (tempo, instruments, audio cues)",
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "time": "0:00 - 0:03",
+      "visual": "Precise visual description of subject, lighting, textures, and framing",
+      "cameraMovement": "e.g. Slow push-in on 35mm lens, low angle panning right",
+      "transition": "e.g. Hard match cut to black / subtle whip pan",
+      "onScreenText": "Minimal typographic overlay or leave empty if none"
+    }
+  ],
+  "finalVideoPrompt": "A single consolidated master cinematic prompt for AI video generation models (e.g. Google Veo, Runway Gen-3, Luma Dream Machine) describing camera, lighting, textures, movement, and negative constraints (no distorted anatomy, no cheesy stock video, no watermarks)."
+}
+Generate between 3 and 6 distinct scenes matching the target duration.`
+}
+

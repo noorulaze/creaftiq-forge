@@ -10,17 +10,23 @@ import {
   Layers,
   Tag,
   ImageIcon,
+  Film,
   RefreshCw,
-  SlidersHorizontal,
   Download,
   AlertCircle,
   BookmarkCheck,
-  ExternalLink,
   Info,
-  Flame,
+  Clock,
+  Ratio,
+  Sliders,
+  Volume2,
+  Music,
+  Play,
+  FileText,
+  ChevronRight,
 } from 'lucide-react'
 import { BlueprintSection } from './BlueprintSection'
-import { generateCreativeImage } from '@/services/ai'
+import { generateCreativeImage, generateCreativeVideo } from '@/services/ai'
 import type {
   CreativeDirectionOutput,
   ColorSwatch,
@@ -28,6 +34,11 @@ import type {
   ImageDirectionDetails,
   UIDirectionDetails,
   GeneratedCreativeImage,
+  VideoGenerationOutput,
+  VideoType,
+  VideoDuration,
+  VideoFormat,
+  VideoStyle,
   IdeaDNA,
   BrandOutput,
 } from '@/types'
@@ -60,6 +71,38 @@ const DEFAULT_SWATCHES: ColorSwatch[] = [
   { hex: '#F8F9FA', name: 'Chalk White', role: 'Editorial Headline', usage: 'High-contrast typography and focal points' },
 ]
 
+const VIDEO_TYPES: VideoType[] = [
+  'Advertisement',
+  'Product Promo',
+  'Social Media Reel',
+  'Brand Launch',
+  'Cinematic Concept',
+  'Website Hero Video',
+]
+
+const VIDEO_DURATIONS: VideoDuration[] = [
+  '5 seconds',
+  '10 seconds',
+  '15 seconds',
+  '30 seconds',
+]
+
+const VIDEO_FORMATS: VideoFormat[] = [
+  '9:16 Vertical',
+  '16:9 Landscape',
+  '1:1 Square',
+]
+
+const VIDEO_STYLES: VideoStyle[] = [
+  'Cinematic',
+  'Premium',
+  'Minimal',
+  'Youthful',
+  'Editorial',
+  'Bold',
+  'Documentary',
+]
+
 export function CreativeBoard({
   creativeDirection,
   projectContext,
@@ -69,19 +112,42 @@ export function CreativeBoard({
   onSave,
   onUpdateCreativeDirection,
 }: CreativeBoardProps) {
-  const [copiedHex, setCopiedHex] = useState<string | null>(null)
-  const [copiedPrompt, setCopiedPrompt] = useState(false)
-  const [copiedPalette, setCopiedPalette] = useState(false)
-  const [showPromptDetails, setShowPromptDetails] = useState(false)
+  const cd = creativeDirection
 
-  // Image Generation State
+  // ── Studio Creation Mode: 'image' | 'video' ─────────────────
+  const [activeCreationMode, setActiveCreationMode] = useState<'image' | 'video'>('image')
+
+  // ── Copy states ─────────────────────────────────────────────
+  const [copiedHex, setCopiedHex] = useState<string | null>(null)
+  const [copiedPalette, setCopiedPalette] = useState(false)
+  const [copiedPrompt, setCopiedPrompt] = useState(false)
+  const [copiedVideoPrompt, setCopiedVideoPrompt] = useState(false)
+  const [copiedStoryboard, setCopiedStoryboard] = useState(false)
+  const [showImagePromptDetails, setShowImagePromptDetails] = useState(false)
+
+  // ── Image Generation State ──────────────────────────────────
   const [imageGenerating, setImageGenerating] = useState(false)
   const [imageError, setImageError] = useState<string | null>(null)
   const [imageResult, setImageResult] = useState<GeneratedCreativeImage | null>(
-    creativeDirection?.generatedImage || null,
+    cd?.generatedImage || null,
   )
 
-  const cd = creativeDirection
+  // ── Video Generation Form State ─────────────────────────────
+  const [videoType, setVideoType] = useState<VideoType>('Cinematic Concept')
+  const [videoDuration, setVideoDuration] = useState<VideoDuration>('15 seconds')
+  const [videoFormat, setVideoFormat] = useState<VideoFormat>('16:9 Landscape')
+  const [videoStyle, setVideoStyle] = useState<VideoStyle>('Cinematic')
+  const [voiceoverText, setVoiceoverText] = useState('')
+  const [musicMood, setMusicMood] = useState('')
+  const [visualInstruction, setVisualInstruction] = useState('')
+
+  // ── Video Generation Result State ───────────────────────────
+  const [videoGenerating, setVideoGenerating] = useState(false)
+  const [videoGenerationStage, setVideoGenerationStage] = useState<string>('')
+  const [videoError, setVideoError] = useState<string | null>(null)
+  const [videoResult, setVideoResult] = useState<VideoGenerationOutput | null>(
+    cd?.generatedVideo || null,
+  )
 
   // ── Normalize Colors (4 to 6 swatches) ──────────────────────
   const colors: ColorSwatch[] = useMemo(() => {
@@ -232,7 +298,6 @@ ${visualKeywords.join(', ')}
         toast.error('Image generation encountered an error.')
       }
 
-      // Persist generated image record in creative direction
       if (onUpdateCreativeDirection && cd) {
         onUpdateCreativeDirection({
           ...cd,
@@ -248,6 +313,97 @@ ${visualKeywords.join(', ')}
     }
   }
 
+  // ── Video Generation Handler ────────────────────────────────
+  async function handleGenerateVideo() {
+    setVideoGenerating(true)
+    setVideoError(null)
+    setVideoGenerationStage('Synthesizing video concept & narrative hook...')
+
+    try {
+      // Step 1: Concept
+      await new Promise(r => setTimeout(r, 400))
+      setVideoGenerationStage('Architecting scene-by-scene storyboard & camera directions...')
+
+      // Step 2: Storyboard & Prompts
+      const response = await generateCreativeVideo({
+        videoType,
+        duration: videoDuration,
+        format: videoFormat,
+        style: videoStyle,
+        voiceoverText: voiceoverText.trim() || undefined,
+        musicMood: musicMood.trim() || undefined,
+        visualInstruction: visualInstruction.trim() || undefined,
+        projectName: projectContext?.name,
+        idea: projectContext?.idea,
+        industry: projectContext?.industry,
+        targetAudience: projectContext?.targetAudience,
+        brandPersonality: cd?.brandPersonality,
+        visualKeywords,
+        colorPalette: colors,
+        mood: cd?.mood,
+      })
+
+      setVideoResult(response)
+
+      if (response.status === 'ready') {
+        toast.success('Cinematic video ready!')
+      } else if (response.status === 'not_configured') {
+        toast('Video storyboard & master prompt ready.', { icon: '🎬' })
+      } else if (response.status === 'error') {
+        setVideoError(response.errorMessage || 'Video generation failed.')
+        toast.error('Video generation failed.')
+      }
+
+      // Persist generated video in project creative direction
+      if (onUpdateCreativeDirection && cd) {
+        onUpdateCreativeDirection({
+          ...cd,
+          generatedVideo: response,
+        })
+      }
+    } catch (err: unknown) {
+      const error = err as Error
+      setVideoError(error.message || 'Video generation failed. Please try again.')
+      toast.error('Video generation request failed.')
+    } finally {
+      setVideoGenerating(false)
+      setVideoGenerationStage('')
+    }
+  }
+
+  // ── Save Video or Image to Project ──────────────────────────
+  function handleSaveMediaToProject(type: 'image' | 'video') {
+    if (onSave) {
+      onSave()
+      toast.success(`${type === 'image' ? 'Image' : 'Video storyboard'} saved to project.`)
+    }
+  }
+
+  // ── Copy Storyboard Text ────────────────────────────────────
+  function handleCopyStoryboard() {
+    if (!videoResult) return
+    const text = [
+      `TITLE: ${videoResult.title}`,
+      `CONCEPT: ${videoResult.concept}`,
+      `FORMAT: ${videoResult.duration} | ${videoResult.aspectRatio} | ${videoResult.visualStyle}`,
+      `VOICEOVER: ${videoResult.voiceover}`,
+      `MUSIC MOOD: ${videoResult.musicMood}`,
+      '',
+      'SCENE-BY-SCENE STORYBOARD:',
+      ...videoResult.scenes.map(
+        s =>
+          `[Scene ${s.sceneNumber} (${s.time})] Visual: ${s.visual} | Camera: ${s.cameraMovement} | Transition: ${s.transition} | On-Screen: ${s.onScreenText || 'None'}`
+      ),
+      '',
+      `FINAL PROMPT: ${videoResult.finalVideoPrompt}`,
+    ].join('\n')
+
+    navigator.clipboard.writeText(text)
+    setCopiedStoryboard(true)
+    toast.success('Full storyboard copied to clipboard')
+    setTimeout(() => setCopiedStoryboard(false), 2000)
+  }
+
   // ── Download Generated Image ────────────────────────────────
   function handleDownloadImage() {
     if (!imageResult?.url) return
@@ -261,7 +417,7 @@ ${visualKeywords.join(', ')}
     toast.success('Download initiated.')
   }
 
-  // ── Copy Image Prompt ───────────────────────────────────────
+  // ── Copy Prompts ────────────────────────────────────────────
   function handleCopyPrompt(promptText: string) {
     navigator.clipboard.writeText(promptText)
     setCopiedPrompt(true)
@@ -269,11 +425,18 @@ ${visualKeywords.join(', ')}
     setTimeout(() => setCopiedPrompt(false), 2000)
   }
 
+  function handleCopyVideoPrompt(promptText: string) {
+    navigator.clipboard.writeText(promptText)
+    setCopiedVideoPrompt(true)
+    toast.success('Master video prompt copied to clipboard')
+    setTimeout(() => setCopiedVideoPrompt(false), 2000)
+  }
+
   return (
     <BlueprintSection
       badge="CREATIVE DIRECTION BOARD"
       heading="THE CREATIVE WORLD OF YOUR IDEA."
-      subheading="A visual moodboard and aesthetic system derived from your project context, audience, and creative DNA."
+      subheading="A visual moodboard and AI creation workspace derived from your project context, audience, and creative DNA."
       copyContent={creativeSummary}
       onRefine={onRefine}
       onRegenerate={onRegenerate}
@@ -282,7 +445,7 @@ ${visualKeywords.join(', ')}
       <div className="space-y-8">
 
         {/* ============================================================ */}
-        {/* ACTION BAR: Quick Actions Specific to Creative Board          */}
+        {/* QUICK ACTION BAR                                              */}
         {/* ============================================================ */}
         <div className="flex items-center justify-between flex-wrap gap-2.5 p-3 rounded-xl border border-forge-border/80 bg-forge-surface/90 backdrop-blur-sm">
           <div className="flex items-center gap-2 flex-wrap">
@@ -309,16 +472,28 @@ ${visualKeywords.join(', ')}
 
             <button
               type="button"
-              onClick={handleGenerateImage}
+              onClick={() => {
+                setActiveCreationMode('image')
+                handleGenerateImage()
+              }}
               disabled={imageGenerating}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-2xs font-bold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light transition-all shadow-blue-glow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-bold tracking-wider uppercase text-forge-white bg-forge-navy hover:bg-forge-surface border border-forge-border transition-colors cursor-pointer disabled:opacity-50"
             >
-              {imageGenerating ? (
-                <RefreshCw size={12} className="animate-spin text-white" />
-              ) : (
-                <Sparkles size={12} className="text-white" />
-              )}
-              <span>{imageGenerating ? 'GENERATING...' : 'GENERATE CREATIVE IMAGE'}</span>
+              <ImageIcon size={12} className="text-forge-blue" />
+              <span>GENERATE IMAGE</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveCreationMode('video')
+                const el = document.getElementById('visual-creation-workspace')
+                el?.scrollIntoView({ behavior: 'smooth' })
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-bold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light transition-all shadow-blue-glow-sm cursor-pointer"
+            >
+              <Film size={12} className="text-white" />
+              <span>GENERATE VIDEO</span>
             </button>
 
             {onSave && (
@@ -338,7 +513,6 @@ ${visualKeywords.join(', ')}
         {/* SECTION 1: OVERALL MOOD                                      */}
         {/* ============================================================ */}
         <div className="relative rounded-2xl border border-forge-border bg-gradient-to-br from-forge-black via-forge-navy to-forge-black p-6 sm:p-10 overflow-hidden shadow-2xl">
-          {/* Subtle electric blue ambient atmosphere */}
           <div className="pointer-events-none absolute -top-24 -right-24 w-88 h-88 rounded-full bg-forge-blue/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-24 w-88 h-88 rounded-full bg-indigo-600/10 blur-3xl" />
 
@@ -401,10 +575,6 @@ ${visualKeywords.join(', ')}
             </div>
           </div>
 
-          <p className="text-xs text-forge-muted font-light mb-5 leading-relaxed max-w-2xl">
-            Each color is calibrated for high optical contrast, emotional alignment with your target audience, and seamless digital execution.
-          </p>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 pt-1">
             {colors.map((token, idx) => {
               const isCopied = copiedHex === token.hex
@@ -413,7 +583,6 @@ ${visualKeywords.join(', ')}
                   key={`${token.hex}-${idx}`}
                   className="p-3.5 rounded-xl border border-forge-border bg-forge-navy/80 hover:bg-forge-navy transition-all text-left flex flex-col justify-between gap-3 group hover:border-forge-blue/50 relative shadow-sm"
                 >
-                  {/* Swatch color preview box */}
                   <div
                     className="w-full h-16 rounded-lg border border-forge-border/60 relative overflow-hidden flex items-end justify-between p-2 transition-transform group-hover:scale-[1.01]"
                     style={{ backgroundColor: token.hex }}
@@ -436,7 +605,6 @@ ${visualKeywords.join(', ')}
                     </button>
                   </div>
 
-                  {/* Swatch Details */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-forge-white truncate" title={token.name}>
@@ -486,7 +654,6 @@ ${visualKeywords.join(', ')}
             </div>
           </div>
 
-          {/* 4 Structured Typography Specifications */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/60">
               <span className="text-3xs font-mono uppercase tracking-wider text-forge-muted block mb-1">
@@ -525,7 +692,7 @@ ${visualKeywords.join(', ')}
             </div>
           </div>
 
-          {/* Live Visual Specimen Hierarchy */}
+          {/* Live Specimen Hierarchy */}
           <div className="p-5 rounded-xl border border-forge-border/80 bg-forge-black space-y-4 text-left">
             <div className="border-b border-forge-border/40 pb-4">
               <div className="flex items-center justify-between text-3xs font-mono text-forge-muted mb-1.5">
@@ -560,169 +727,102 @@ ${visualKeywords.join(', ')}
         </div>
 
         {/* ============================================================ */}
-        {/* SECTION 4: IMAGE DIRECTION                                   */}
+        {/* SECTION 4 & 5: IMAGE DIRECTION & UI DIRECTION                */}
         {/* ============================================================ */}
-        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
-          <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-6 flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <Camera size={16} className="text-forge-blue" />
-              <h3 className="text-xs font-mono font-bold text-forge-white uppercase tracking-wider">
-                04 / IMAGE DIRECTION
-              </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Image Direction */}
+          <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <Camera size={15} className="text-forge-blue" />
+                  <h3 className="text-xs font-mono font-bold text-forge-white uppercase tracking-wider">
+                    04 / IMAGE DIRECTION
+                  </h3>
+                </div>
+                <span className="text-2xs font-mono text-forge-blue">CINEMATIC CRAFT</span>
+              </div>
+
+              <div className="space-y-3 text-xs text-forge-offwhite font-light leading-relaxed">
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Photography Style:
+                  </span>
+                  <span>{imageDir.photographyStyle}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Lighting Direction:
+                  </span>
+                  <span>{imageDir.lightingDirection}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Composition Style:
+                  </span>
+                  <span>{imageDir.compositionStyle}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Subject Direction:
+                  </span>
+                  <span>{imageDir.subjectDirection}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Background Direction:
+                  </span>
+                  <span>{imageDir.backgroundDirection}</span>
+                </div>
+              </div>
             </div>
-            <span className="text-2xs font-mono text-forge-blue">
-              PHOTOGRAPHY & ART DIRECTION
-            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Photography Style */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-forge-blue">
-                <span className="w-1.5 h-1.5 rounded-full bg-forge-blue" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  PHOTOGRAPHY STYLE
-                </span>
+          {/* UI Direction */}
+          <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <Layers size={15} className="text-cyan-400" />
+                  <h3 className="text-xs font-mono font-bold text-forge-white uppercase tracking-wider">
+                    05 / UI DIRECTION
+                  </h3>
+                </div>
+                <span className="text-2xs font-mono text-cyan-400">DESIGN SYSTEM</span>
               </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {imageDir.photographyStyle}
-              </p>
-            </div>
 
-            {/* Lighting Direction */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-cyan-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  LIGHTING DIRECTION
-                </span>
+              <div className="space-y-3 text-xs text-forge-offwhite font-light leading-relaxed">
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Layout Style:
+                  </span>
+                  <span>{uiDir.layoutStyle}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Card Style:
+                  </span>
+                  <span>{uiDir.cardStyle}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Button Style:
+                  </span>
+                  <span>{uiDir.buttonStyle}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Spacing Direction:
+                  </span>
+                  <span>{uiDir.spacingDirection}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-forge-white block text-3xs font-mono uppercase text-forge-muted">
+                    Interaction Style:
+                  </span>
+                  <span>{uiDir.interactionStyle}</span>
+                </div>
               </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {imageDir.lightingDirection}
-              </p>
-            </div>
-
-            {/* Composition Style */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  COMPOSITION STYLE
-                </span>
-              </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {imageDir.compositionStyle}
-              </p>
-            </div>
-
-            {/* Subject Direction */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-purple-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  SUBJECT DIRECTION
-                </span>
-              </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {imageDir.subjectDirection}
-              </p>
-            </div>
-
-            {/* Background Direction */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5 md:col-span-2 lg:col-span-2">
-              <div className="flex items-center gap-2 text-amber-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  BACKGROUND DIRECTION
-                </span>
-              </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {imageDir.backgroundDirection}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* ============================================================ */}
-        {/* SECTION 5: UI DIRECTION                                      */}
-        {/* ============================================================ */}
-        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
-          <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-6 flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <Layers size={16} className="text-forge-blue" />
-              <h3 className="text-xs font-mono font-bold text-forge-white uppercase tracking-wider">
-                05 / UI DIRECTION
-              </h3>
-            </div>
-            <span className="text-2xs font-mono text-cyan-400">
-              INTERFACE CRAFT & ERGONOMICS
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Layout Style */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-cyan-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  LAYOUT STYLE
-                </span>
-              </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {uiDir.layoutStyle}
-              </p>
-            </div>
-
-            {/* Card Style */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-forge-blue">
-                <span className="w-1.5 h-1.5 rounded-full bg-forge-blue" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  CARD STYLE
-                </span>
-              </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {uiDir.cardStyle}
-              </p>
-            </div>
-
-            {/* Button Style */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  BUTTON STYLE
-                </span>
-              </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {uiDir.buttonStyle}
-              </p>
-            </div>
-
-            {/* Spacing Direction */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-purple-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  SPACING DIRECTION
-                </span>
-              </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {uiDir.spacingDirection}
-              </p>
-            </div>
-
-            {/* Interaction Style */}
-            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 space-y-1.5 sm:col-span-2 lg:col-span-2">
-              <div className="flex items-center gap-2 text-amber-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <span className="text-3xs font-mono uppercase tracking-wider font-bold">
-                  INTERACTION STYLE
-                </span>
-              </div>
-              <p className="text-xs text-forge-offwhite font-light leading-relaxed">
-                {uiDir.interactionStyle}
-              </p>
             </div>
           </div>
         </div>
@@ -756,250 +856,715 @@ ${visualKeywords.join(', ')}
         </div>
 
         {/* ============================================================ */}
-        {/* IMAGE GENERATION: AI CREATIVE VISUAL                          */}
+        {/* AI VISUAL CREATION WORKSPACE (IMAGE & VIDEO MODES)           */}
         {/* ============================================================ */}
-        <div className="rounded-2xl border border-forge-border bg-gradient-to-b from-forge-surface to-forge-black p-6 sm:p-8 shadow-xl">
-          <div className="flex items-center justify-between border-b border-forge-border/60 pb-4 mb-6 flex-wrap gap-3">
+        <div
+          id="visual-creation-workspace"
+          className="rounded-2xl border border-forge-blue/30 bg-gradient-to-b from-forge-surface via-forge-navy/40 to-forge-black p-6 sm:p-8 shadow-2xl space-y-6"
+        >
+          {/* Workspace Header with Mode Switcher */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-forge-border/80 pb-5">
             <div>
-              <div className="flex items-center gap-2">
-                <ImageIcon size={17} className="text-forge-blue" />
-                <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
-                  AI CREATIVE IMAGE
-                </h3>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold px-2 py-0.5 rounded bg-forge-navy border border-forge-blue/30">
+                  AI CREATION STUDIO
+                </span>
+                <span className="text-3xs font-mono text-forge-muted">
+                  SECURE GEMINI BACKEND
+                </span>
               </div>
-              <p className="text-xs text-forge-muted font-light mt-0.5">
-                Generate a high-taste visual representation based on your project context and aesthetic direction.
-              </p>
+              <h3 className="text-lg sm:text-xl font-black text-forge-white tracking-tight uppercase">
+                AI VISUAL CREATION WORKSPACE
+              </h3>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {imageResult && (
-                <button
-                  type="button"
-                  onClick={() => setShowPromptDetails(prev => !prev)}
-                  className="text-2xs font-mono uppercase text-forge-muted hover:text-forge-white px-2.5 py-1.5 rounded-lg border border-forge-border bg-forge-navy transition-colors cursor-pointer"
-                >
-                  {showPromptDetails ? 'Hide Prompt' : 'View Prompt'}
-                </button>
-              )}
-
-              {imageResult?.url && (
-                <button
-                  type="button"
-                  onClick={handleDownloadImage}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase text-forge-white bg-forge-surface hover:bg-forge-surface2 border border-forge-border transition-colors cursor-pointer"
-                >
-                  <Download size={12} />
-                  <span>Download</span>
-                </button>
-              )}
+            {/* Mode Switcher Buttons */}
+            <div className="flex items-center p-1 rounded-xl bg-forge-black border border-forge-border/80 self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setActiveCreationMode('image')}
+                className={cn(
+                  'flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all',
+                  activeCreationMode === 'image'
+                    ? 'bg-forge-navy text-forge-white border border-forge-blue/40 shadow-blue-glow-sm'
+                    : 'text-forge-muted hover:text-forge-white',
+                )}
+              >
+                <ImageIcon size={14} className={activeCreationMode === 'image' ? 'text-forge-blue' : ''} />
+                <span>1. Generate Image</span>
+              </button>
 
               <button
                 type="button"
-                onClick={handleGenerateImage}
-                disabled={imageGenerating}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-2xs font-bold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light transition-all shadow-blue-glow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {imageGenerating ? (
-                  <RefreshCw size={13} className="animate-spin text-white" />
-                ) : imageResult ? (
-                  <RefreshCw size={13} className="text-white" />
-                ) : (
-                  <Sparkles size={13} className="text-white" />
+                onClick={() => setActiveCreationMode('video')}
+                className={cn(
+                  'flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all',
+                  activeCreationMode === 'video'
+                    ? 'bg-forge-navy text-forge-white border border-forge-blue/40 shadow-blue-glow-sm'
+                    : 'text-forge-muted hover:text-forge-white',
                 )}
-                <span>
-                  {imageGenerating
-                    ? 'ENGINEERING VISUAL...'
-                    : imageResult
-                    ? 'REGENERATE IMAGE'
-                    : 'GENERATE CREATIVE IMAGE'}
-                </span>
+              >
+                <Film size={14} className={activeCreationMode === 'video' ? 'text-forge-blue' : ''} />
+                <span>2. Generate Video</span>
               </button>
             </div>
           </div>
 
-          {/* 1. Loading State */}
-          {imageGenerating && (
-            <div className="p-10 rounded-xl border border-forge-blue/30 bg-forge-navy/50 flex flex-col items-center justify-center text-center gap-4">
-              <div className="relative">
-                <div className="w-14 h-14 rounded-full border-2 border-forge-blue/20 border-t-forge-blue animate-spin" />
-                <Sparkles size={18} className="absolute inset-0 m-auto text-forge-blue animate-pulse" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-bold text-forge-white uppercase tracking-wider">
-                  ENGINEERING VISUAL PROMPT & GENERATING IMAGE...
-                </h4>
-                <p className="text-xs text-forge-muted font-light max-w-md">
-                  Synthesizing your project concept, color tokens, lighting specifications, and aesthetic constraints through secure server-side AI.
+          {/* ──────────────────────────────────────────────────────────── */}
+          {/* MODE 1: GENERATE IMAGE                                       */}
+          {/* ──────────────────────────────────────────────────────────── */}
+          {activeCreationMode === 'image' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <p className="text-xs text-forge-muted font-light max-w-xl">
+                  Synthesizes your project concept, Idea DNA, brand personality, color tokens, and visual keywords into an editorial visual prompt using the secure Gemini backend.
                 </p>
-              </div>
-            </div>
-          )}
 
-          {/* 2. Error State */}
-          {!imageGenerating && imageError && (
-            <div className="p-6 rounded-xl border border-rose-500/30 bg-rose-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle size={20} className="text-rose-400 flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400">
-                    IMAGE GENERATION ENCOUNTERED AN ISSUE
-                  </h4>
-                  <p className="text-xs text-rose-200/90 font-light leading-relaxed">
-                    {imageError}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleGenerateImage}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase text-forge-white bg-rose-500 hover:bg-rose-600 transition-colors flex-shrink-0 cursor-pointer"
-              >
-                <RefreshCw size={11} />
-                <span>Retry</span>
-              </button>
-            </div>
-          )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {imageResult && (
+                    <button
+                      type="button"
+                      onClick={() => setShowImagePromptDetails(prev => !prev)}
+                      className="text-2xs font-mono uppercase text-forge-muted hover:text-forge-white px-3 py-1.5 rounded-lg border border-forge-border bg-forge-navy transition-colors cursor-pointer"
+                    >
+                      {showImagePromptDetails ? 'Hide Prompt' : 'View Prompt'}
+                    </button>
+                  )}
 
-          {/* 3. Ready State: Live Rendered Image */}
-          {!imageGenerating && imageResult?.status === 'ready' && imageResult.url && (
-            <div className="space-y-4">
-              <div className="relative rounded-xl border border-forge-border bg-forge-black overflow-hidden shadow-2xl group max-h-[480px] flex items-center justify-center">
-                <img
-                  src={imageResult.url}
-                  alt={projectContext?.name || 'Creative Direction'}
-                  className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.01]"
-                />
-                <div className="absolute bottom-3 left-3 right-3 p-3 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 flex items-center justify-between flex-wrap gap-2 opacity-95">
-                  <div className="flex items-center gap-2 text-3xs font-mono text-forge-white">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>AI VISUAL DIRECTION READY</span>
-                  </div>
+                  {imageResult?.url && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleDownloadImage}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase text-forge-white bg-forge-surface hover:bg-forge-surface2 border border-forge-border transition-colors cursor-pointer"
+                      >
+                        <Download size={12} />
+                        <span>Download</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSaveMediaToProject('image')}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-colors cursor-pointer"
+                      >
+                        <BookmarkCheck size={12} />
+                        <span>Save to Project</span>
+                      </button>
+                    </>
+                  )}
+
                   <button
                     type="button"
-                    onClick={handleDownloadImage}
-                    className="text-3xs font-mono uppercase text-forge-blue hover:text-forge-blue-light transition-colors"
+                    onClick={handleGenerateImage}
+                    disabled={imageGenerating}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-2xs font-bold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light transition-all shadow-blue-glow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Download Asset
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 4. Not Configured State: Setup Guidance + Visual Prompt */}
-          {!imageGenerating && imageResult?.status === 'not_configured' && (
-            <div className="rounded-xl border border-forge-border bg-forge-navy/60 p-6 space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-forge-surface border border-forge-border text-forge-blue flex-shrink-0">
-                  <Info size={18} />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-forge-white">
-                      IMAGE GENERATION SETUP REQUIRED
-                    </h4>
-                    <span className="text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-surface text-forge-muted border border-forge-border">
-                      PROVIDER ABSTRACTION READY
+                    {imageGenerating ? (
+                      <RefreshCw size={13} className="animate-spin text-white" />
+                    ) : imageResult ? (
+                      <RefreshCw size={13} className="text-white" />
+                    ) : (
+                      <Sparkles size={13} className="text-white" />
+                    )}
+                    <span>
+                      {imageGenerating
+                        ? 'ENGINEERING IMAGE PROMPT...'
+                        : imageResult
+                        ? 'REGENERATE IMAGE'
+                        : 'GENERATE CREATIVE IMAGE'}
                     </span>
-                  </div>
-                  <p className="text-xs text-forge-muted font-light leading-relaxed">
-                    The server-side image abstraction and prompt generator are live. To enable instant live AI image generation, configure your preferred image provider (such as Imagen 3 or Gemini image model) in Firebase Cloud Functions or environment settings.
-                  </p>
-                </div>
-              </div>
-
-              {/* Engineered Visual Prompt Preview Container */}
-              <div className="p-4 rounded-lg border border-forge-border bg-forge-black space-y-2">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold">
-                    ENGINEERED VISUAL PROMPT:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyPrompt(imageResult.prompt)}
-                    className="inline-flex items-center gap-1 text-3xs font-mono uppercase text-forge-muted hover:text-forge-white transition-colors cursor-pointer"
-                  >
-                    {copiedPrompt ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
-                    <span>{copiedPrompt ? 'Copied' : 'Copy Prompt'}</span>
                   </button>
                 </div>
-                <p className="text-xs font-mono text-forge-offwhite/90 leading-relaxed break-words">
-                  "{imageResult.prompt}"
-                </p>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-forge-border/40 flex-wrap gap-2">
-                <span className="text-3xs font-mono text-forge-muted">
-                  Use this prompt in Midjourney, Flux, or configure IMAGEN_API_KEY in Cloud Functions.
-                </span>
-                <button
-                  type="button"
-                  onClick={handleGenerateImage}
-                  className="inline-flex items-center gap-1 text-2xs font-semibold uppercase text-forge-blue hover:text-forge-blue-light transition-colors cursor-pointer"
-                >
-                  <RefreshCw size={11} />
-                  <span>Try Generate Again</span>
-                </button>
-              </div>
-            </div>
-          )}
+              {/* Loading State */}
+              {imageGenerating && (
+                <div className="p-10 rounded-xl border border-forge-blue/30 bg-forge-navy/50 flex flex-col items-center justify-center text-center gap-4">
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-full border-2 border-forge-blue/20 border-t-forge-blue animate-spin" />
+                    <Sparkles size={18} className="absolute inset-0 m-auto text-forge-blue animate-pulse" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                      ENGINEERING VISUAL PROMPT & GENERATING IMAGE...
+                    </h4>
+                    <p className="text-xs text-forge-muted font-light max-w-md">
+                      Synthesizing project concept, color tokens, lighting specifications, and aesthetic constraints through secure server-side AI.
+                    </p>
+                  </div>
+                </div>
+              )}
 
-          {/* 5. Idle Initial State: Prompt to Generate */}
-          {!imageGenerating && !imageResult && !imageError && (
-            <div className="p-8 rounded-xl border border-dashed border-forge-border/80 bg-forge-navy/30 flex flex-col items-center justify-center text-center gap-3">
-              <div className="p-3 rounded-full bg-forge-surface border border-forge-border text-forge-blue">
-                <ImageIcon size={22} />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-forge-white">
-                  NO CREATIVE IMAGE GENERATED YET
-                </h4>
-                <p className="text-xs text-forge-muted font-light max-w-md">
-                  Click below to synthesize a tailored visual art prompt from your project idea, audience, and color palette.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleGenerateImage}
-                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-2xs font-bold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light transition-all shadow-blue-glow-sm cursor-pointer"
-              >
-                <Sparkles size={12} className="text-white" />
-                <span>GENERATE CREATIVE IMAGE</span>
-              </button>
-            </div>
-          )}
+              {/* Error State */}
+              {!imageGenerating && imageError && (
+                <div className="p-6 rounded-xl border border-rose-500/30 bg-rose-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle size={20} className="text-rose-400 flex-shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400">
+                        IMAGE GENERATION ENCOUNTERED AN ISSUE
+                      </h4>
+                      <p className="text-xs text-rose-200/90 font-light leading-relaxed">
+                        {imageError}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGenerateImage}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase text-forge-white bg-rose-500 hover:bg-rose-600 transition-colors flex-shrink-0 cursor-pointer"
+                  >
+                    <RefreshCw size={11} />
+                    <span>Retry</span>
+                  </button>
+                </div>
+              )}
 
-          {/* Expandable Prompt Details Drawer */}
-          <AnimatePresence>
-            {showPromptDetails && imageResult?.prompt && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-4 pt-4 border-t border-forge-border/60 overflow-hidden"
-              >
-                <div className="p-3.5 rounded-lg border border-forge-border bg-forge-black space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xs font-mono uppercase text-forge-muted">
-                      PROMPT SPECIFICATION:
+              {/* Ready State */}
+              {!imageGenerating && imageResult?.status === 'ready' && imageResult.url && (
+                <div className="space-y-4">
+                  <div className="relative rounded-xl border border-forge-border bg-forge-black overflow-hidden shadow-2xl group max-h-[480px] flex items-center justify-center">
+                    <img
+                      src={imageResult.url}
+                      alt={projectContext?.name || 'Creative Direction'}
+                      className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.01]"
+                    />
+                    <div className="absolute bottom-3 left-3 right-3 p-3 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 flex items-center justify-between flex-wrap gap-2 opacity-95">
+                      <div className="flex items-center gap-2 text-3xs font-mono text-forge-white">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>AI VISUAL DIRECTION READY</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleDownloadImage}
+                        className="text-3xs font-mono uppercase text-forge-blue hover:text-forge-blue-light transition-colors"
+                      >
+                        Download Asset
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Not Configured State */}
+              {!imageGenerating && imageResult?.status === 'not_configured' && (
+                <div className="rounded-xl border border-forge-border bg-forge-navy/60 p-6 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-forge-surface border border-forge-border text-forge-blue flex-shrink-0">
+                      <Info size={18} />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-forge-white">
+                          IMAGE GENERATION SETUP REQUIRED
+                        </h4>
+                        <span className="text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-surface text-forge-muted border border-forge-border">
+                          BACKEND PROMPT ENGINE READY
+                        </span>
+                      </div>
+                      <p className="text-xs text-forge-muted font-light leading-relaxed">
+                        The secure server-side Gemini prompt synthesis engine is active. To enable live AI image file generation, configure your preferred image provider (e.g. Imagen 3 or Gemini image model) in Firebase Cloud Functions via <code className="text-forge-blue font-mono text-3xs">IMAGEN_API_KEY</code>.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-forge-border bg-forge-black space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                        GEMINI ENGINEERED IMAGE PROMPT:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyPrompt(imageResult.prompt)}
+                        className="inline-flex items-center gap-1 text-3xs font-mono uppercase text-forge-muted hover:text-forge-white transition-colors cursor-pointer"
+                      >
+                        {copiedPrompt ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                        <span>{copiedPrompt ? 'Copied' : 'Copy Prompt'}</span>
+                      </button>
+                    </div>
+                    <p className="text-xs font-mono text-forge-offwhite/90 leading-relaxed break-words">
+                      "{imageResult.prompt}"
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-forge-border/40 flex-wrap gap-2">
+                    <span className="text-3xs font-mono text-forge-muted">
+                      Use this prompt directly in Midjourney, Flux, or configure IMAGEN_API_KEY.
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleCopyPrompt(imageResult.prompt)}
-                      className="text-3xs font-mono uppercase text-forge-blue hover:underline"
+                      onClick={handleGenerateImage}
+                      className="inline-flex items-center gap-1 text-2xs font-semibold uppercase text-forge-blue hover:text-forge-blue-light transition-colors cursor-pointer"
                     >
-                      {copiedPrompt ? 'Copied' : 'Copy'}
+                      <RefreshCw size={11} />
+                      <span>Try Generate Again</span>
                     </button>
                   </div>
-                  <p className="text-xs font-mono text-forge-offwhite/90 leading-relaxed">
-                    {imageResult.prompt}
-                  </p>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+
+              {/* Idle State */}
+              {!imageGenerating && !imageResult && !imageError && (
+                <div className="p-8 rounded-xl border border-dashed border-forge-border/80 bg-forge-navy/30 flex flex-col items-center justify-center text-center gap-3">
+                  <div className="p-3 rounded-full bg-forge-surface border border-forge-border text-forge-blue">
+                    <ImageIcon size={22} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-forge-white">
+                      READY TO GENERATE AI CREATIVE VISUAL
+                    </h4>
+                    <p className="text-xs text-forge-muted font-light max-w-md">
+                      Click below to generate a tailored visual prompt and render an editorial image from your project tokens.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGenerateImage}
+                    className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-2xs font-bold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light transition-all shadow-blue-glow-sm cursor-pointer"
+                  >
+                    <Sparkles size={12} className="text-white" />
+                    <span>GENERATE CREATIVE IMAGE</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Expandable Image Prompt Details */}
+              <AnimatePresence>
+                {showImagePromptDetails && imageResult?.prompt && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pt-2"
+                  >
+                    <div className="p-3.5 rounded-lg border border-forge-border bg-forge-black space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-3xs font-mono uppercase text-forge-muted">
+                          IMAGE PROMPT SPECIFICATION:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyPrompt(imageResult.prompt)}
+                          className="text-3xs font-mono uppercase text-forge-blue hover:underline"
+                        >
+                          {copiedPrompt ? 'Copied' : 'Copy'}
+                        </button>
+                      </div>
+                      <p className="text-xs font-mono text-forge-offwhite/90 leading-relaxed">
+                        {imageResult.prompt}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* ──────────────────────────────────────────────────────────── */}
+          {/* MODE 2: GENERATE VIDEO                                       */}
+          {/* ──────────────────────────────────────────────────────────── */}
+          {activeCreationMode === 'video' && (
+            <div className="space-y-6">
+              <p className="text-xs text-forge-muted font-light max-w-xl">
+                Configure your video parameters below. Gemini will synthesize a cinematic video concept, a scene-by-scene storyboard with camera directions, and a master AI video prompt.
+              </p>
+
+              {/* Video Configuration Selectors Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-xl border border-forge-border bg-forge-navy/40">
+                {/* 1. Video Type */}
+                <div className="space-y-2">
+                  <label className="text-3xs font-mono uppercase tracking-wider text-forge-muted font-bold block">
+                    VIDEO TYPE
+                  </label>
+                  <select
+                    value={videoType}
+                    onChange={e => setVideoType(e.target.value as VideoType)}
+                    className="w-full text-xs font-mono bg-forge-surface border border-forge-border rounded-lg px-3 py-2 text-forge-white focus:outline-none focus:border-forge-blue"
+                  >
+                    {VIDEO_TYPES.map(vt => (
+                      <option key={vt} value={vt} className="bg-forge-black">
+                        {vt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 2. Duration */}
+                <div className="space-y-2">
+                  <label className="text-3xs font-mono uppercase tracking-wider text-forge-muted font-bold block">
+                    DURATION
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {VIDEO_DURATIONS.map(dur => (
+                      <button
+                        key={dur}
+                        type="button"
+                        onClick={() => setVideoDuration(dur)}
+                        className={cn(
+                          'px-2 py-1.5 rounded text-3xs font-mono text-center transition-colors',
+                          videoDuration === dur
+                            ? 'bg-forge-blue text-white font-bold'
+                            : 'bg-forge-surface text-forge-muted hover:text-white border border-forge-border',
+                        )}
+                      >
+                        {dur}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Format / Aspect Ratio */}
+                <div className="space-y-2">
+                  <label className="text-3xs font-mono uppercase tracking-wider text-forge-muted font-bold block">
+                    FORMAT / ASPECT RATIO
+                  </label>
+                  <div className="space-y-1">
+                    {VIDEO_FORMATS.map(fmt => (
+                      <button
+                        key={fmt}
+                        type="button"
+                        onClick={() => setVideoFormat(fmt)}
+                        className={cn(
+                          'w-full px-2.5 py-1.5 rounded text-3xs font-mono text-left transition-colors flex items-center justify-between',
+                          videoFormat === fmt
+                            ? 'bg-forge-blue text-white font-bold'
+                            : 'bg-forge-surface text-forge-muted hover:text-white border border-forge-border',
+                        )}
+                      >
+                        <span>{fmt}</span>
+                        {videoFormat === fmt && <Check size={11} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 4. Visual Style */}
+                <div className="space-y-2">
+                  <label className="text-3xs font-mono uppercase tracking-wider text-forge-muted font-bold block">
+                    VISUAL STYLE
+                  </label>
+                  <select
+                    value={videoStyle}
+                    onChange={e => setVideoStyle(e.target.value as VideoStyle)}
+                    className="w-full text-xs font-mono bg-forge-surface border border-forge-border rounded-lg px-3 py-2 text-forge-white focus:outline-none focus:border-forge-blue"
+                  >
+                    {VIDEO_STYLES.map(st => (
+                      <option key={st} value={st} className="bg-forge-black">
+                        {st}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Optional Guidance Inputs */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-3xs font-mono uppercase tracking-wider text-forge-muted block">
+                    OPTIONAL VOICEOVER SCRIPT GUIDANCE
+                  </label>
+                  <input
+                    type="text"
+                    value={voiceoverText}
+                    onChange={e => setVoiceoverText(e.target.value)}
+                    placeholder="e.g. Every breakthrough begins in the dark..."
+                    className="w-full text-xs bg-forge-surface border border-forge-border rounded-lg px-3 py-2 text-forge-white placeholder-forge-muted/60 focus:outline-none focus:border-forge-blue"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-3xs font-mono uppercase tracking-wider text-forge-muted block">
+                    OPTIONAL MUSIC / AUDIO MOOD
+                  </label>
+                  <input
+                    type="text"
+                    value={musicMood}
+                    onChange={e => setMusicMood(e.target.value)}
+                    placeholder="e.g. Deep ambient sub-bass swelling into electronic pulse..."
+                    className="w-full text-xs bg-forge-surface border border-forge-border rounded-lg px-3 py-2 text-forge-white placeholder-forge-muted/60 focus:outline-none focus:border-forge-blue"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-3xs font-mono uppercase tracking-wider text-forge-muted block">
+                    OPTIONAL VISUAL INSTRUCTION
+                  </label>
+                  <input
+                    type="text"
+                    value={visualInstruction}
+                    onChange={e => setVisualInstruction(e.target.value)}
+                    placeholder="e.g. High tactile detail on materials, 35mm lens..."
+                    className="w-full text-xs bg-forge-surface border border-forge-border rounded-lg px-3 py-2 text-forge-white placeholder-forge-muted/60 focus:outline-none focus:border-forge-blue"
+                  />
+                </div>
+              </div>
+
+              {/* Primary Video Generate Action */}
+              <div className="flex items-center justify-between flex-wrap gap-3 pt-2">
+                <div className="flex items-center gap-2 text-3xs font-mono text-forge-muted">
+                  <Sparkles size={13} className="text-forge-blue" />
+                  <span>OUTPUTS: CONCEPT • SCENE STORYBOARD • MASTER PROMPT</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleGenerateVideo}
+                  disabled={videoGenerating}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light transition-all shadow-blue-glow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {videoGenerating ? (
+                    <RefreshCw size={13} className="animate-spin text-white" />
+                  ) : (
+                    <Film size={13} className="text-white" />
+                  )}
+                  <span>{videoGenerating ? 'GENERATING STORYBOARD...' : 'GENERATE VIDEO STORYBOARD'}</span>
+                </button>
+              </div>
+
+              {/* Loading State */}
+              {videoGenerating && (
+                <div className="p-10 rounded-xl border border-forge-blue/30 bg-forge-navy/50 flex flex-col items-center justify-center text-center gap-4">
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-full border-2 border-forge-blue/20 border-t-forge-blue animate-spin" />
+                    <Film size={18} className="absolute inset-0 m-auto text-forge-blue animate-pulse" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                      {videoGenerationStage || 'GENERATING SCENE STORYBOARD WITH GEMINI...'}
+                    </h4>
+                    <p className="text-xs text-forge-muted font-light max-w-md">
+                      Orchestrating pacing for {videoDuration}, camera angles, lighting cues, and master prompt parameters.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Error State */}
+              {!videoGenerating && videoError && (
+                <div className="p-6 rounded-xl border border-rose-500/30 bg-rose-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle size={20} className="text-rose-400 flex-shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400">
+                        VIDEO GENERATION ENCOUNTERED AN ISSUE
+                      </h4>
+                      <p className="text-xs text-rose-200/90 font-light leading-relaxed">
+                        {videoError}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGenerateVideo}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase text-forge-white bg-rose-500 hover:bg-rose-600 transition-colors flex-shrink-0 cursor-pointer"
+                  >
+                    <RefreshCw size={11} />
+                    <span>Retry</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Video Result Display (Storyboard & Concepts) */}
+              {!videoGenerating && videoResult && (
+                <div className="space-y-6 pt-2">
+                  {/* Action Bar for Video Result */}
+                  <div className="flex items-center justify-between flex-wrap gap-2.5 p-3 rounded-xl border border-forge-border bg-forge-navy/60">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-surface text-forge-white font-bold border border-forge-border">
+                        {videoResult.visualStyle}
+                      </span>
+                      <span className="text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-surface text-forge-muted border border-forge-border">
+                        {videoResult.duration}
+                      </span>
+                      <span className="text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-surface text-forge-muted border border-forge-border">
+                        {videoResult.aspectRatio}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={handleCopyStoryboard}
+                        className="inline-flex items-center gap-1 text-2xs font-semibold uppercase text-forge-white bg-forge-surface hover:bg-forge-surface2 border border-forge-border px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                      >
+                        {copiedStoryboard ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                        <span>{copiedStoryboard ? 'Copied' : 'Copy Storyboard'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSaveMediaToProject('video')}
+                        className="inline-flex items-center gap-1 text-2xs font-semibold uppercase text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <BookmarkCheck size={12} />
+                        <span>Save to Project</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleGenerateVideo}
+                        className="inline-flex items-center gap-1 text-2xs font-semibold uppercase text-forge-muted hover:text-forge-white bg-forge-navy border border-forge-border px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <RefreshCw size={12} />
+                        <span>Regenerate</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Ready State: Live Video Player if available */}
+                  {videoResult.status === 'ready' && videoResult.videoUrl && (
+                    <div className="relative rounded-xl border border-forge-border bg-forge-black overflow-hidden shadow-2xl">
+                      <video
+                        src={videoResult.videoUrl}
+                        controls
+                        className="w-full max-h-[440px] object-contain bg-black"
+                      />
+                    </div>
+                  )}
+
+                  {/* Provider Setup Message if not configured */}
+                  {videoResult.status === 'not_configured' && (
+                    <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/70 flex items-start gap-3">
+                      <Info size={18} className="text-forge-blue flex-shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-forge-white">
+                            VIDEO RENDERING ENGINE SETUP REQUIRED
+                          </h4>
+                          <span className="text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-surface text-forge-muted border border-forge-border">
+                            STORYBOARD COMPILED
+                          </span>
+                        </div>
+                        <p className="text-xs text-forge-muted font-light leading-relaxed">
+                          The complete scene-by-scene storyboard, camera choreography, and master video prompt are ready below. To render live MP4 files, configure your video provider (e.g. Google Veo, Runway Gen-3, or Luma Dream Machine) via <code className="text-forge-blue font-mono text-3xs">VIDEO_GENERATION_KEY</code> in Firebase Cloud Functions.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Video Concept Header Card */}
+                  <div className="p-6 rounded-xl border border-forge-border bg-forge-surface space-y-4">
+                    <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 flex-wrap gap-2">
+                      <span className="text-2xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                        VIDEO NARRATIVE & CONCEPT
+                      </span>
+                      <h4 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                        {videoResult.title}
+                      </h4>
+                    </div>
+
+                    <p className="text-sm text-forge-offwhite font-light leading-relaxed">
+                      {videoResult.concept}
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div className="p-3 rounded-lg border border-forge-border bg-forge-navy/60 space-y-1">
+                        <span className="text-3xs font-mono uppercase text-forge-muted flex items-center gap-1.5">
+                          <Volume2 size={12} className="text-forge-blue" />
+                          VOICEOVER SCRIPT:
+                        </span>
+                        <p className="text-xs text-forge-offwhite italic">
+                          "{videoResult.voiceover}"
+                        </p>
+                      </div>
+
+                      <div className="p-3 rounded-lg border border-forge-border bg-forge-navy/60 space-y-1">
+                        <span className="text-3xs font-mono uppercase text-forge-muted flex items-center gap-1.5">
+                          <Music size={12} className="text-cyan-400" />
+                          AUDIO DIRECTION & MUSIC MOOD:
+                        </span>
+                        <p className="text-xs text-forge-offwhite">
+                          {videoResult.musicMood}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Scene-by-Scene Storyboard */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <h4 className="text-xs font-mono font-bold text-forge-white uppercase tracking-wider flex items-center gap-1.5">
+                        <Film size={14} className="text-forge-blue" />
+                        SCENE-BY-SCENE STORYBOARD ({videoResult.scenes.length} SCENES)
+                      </h4>
+                      <span className="text-3xs font-mono text-forge-muted">
+                        CHOREOGRAPHED FOR {videoResult.duration}
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {videoResult.scenes.map(scene => (
+                        <div
+                          key={scene.sceneNumber}
+                          className="p-4 rounded-xl border border-forge-border bg-forge-navy/50 hover:bg-forge-navy/80 transition-colors space-y-2.5"
+                        >
+                          <div className="flex items-center justify-between flex-wrap gap-2 border-b border-forge-border/40 pb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-forge-blue/20 text-forge-blue border border-forge-blue/30">
+                                SCENE 0{scene.sceneNumber}
+                              </span>
+                              <span className="text-xs font-mono text-forge-muted flex items-center gap-1">
+                                <Clock size={12} />
+                                {scene.time}
+                              </span>
+                            </div>
+
+                            {scene.onScreenText && (
+                              <span className="text-3xs font-mono text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                                TEXT: "{scene.onScreenText}"
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-xs text-forge-white leading-relaxed">
+                            <strong className="text-forge-muted font-mono text-3xs uppercase block mb-0.5">
+                              VISUAL DIRECTION:
+                            </strong>
+                            {scene.visual}
+                          </p>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-3xs font-mono pt-1">
+                            <div className="px-2.5 py-1.5 rounded bg-forge-black/60 border border-forge-border/50 text-forge-muted">
+                              <span className="text-forge-blue font-bold">CAMERA: </span>
+                              {scene.cameraMovement}
+                            </div>
+                            <div className="px-2.5 py-1.5 rounded bg-forge-black/60 border border-forge-border/50 text-forge-muted">
+                              <span className="text-cyan-400 font-bold">TRANSITION: </span>
+                              {scene.transition}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Final Consolidated Video Prompt */}
+                  <div className="p-5 rounded-xl border border-forge-border bg-forge-black space-y-2.5">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                        MASTER AI VIDEO GENERATION PROMPT:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyVideoPrompt(videoResult.finalVideoPrompt)}
+                        className="inline-flex items-center gap-1 text-3xs font-mono uppercase text-forge-muted hover:text-forge-white transition-colors cursor-pointer"
+                      >
+                        {copiedVideoPrompt ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                        <span>{copiedVideoPrompt ? 'Copied' : 'Copy Master Prompt'}</span>
+                      </button>
+                    </div>
+
+                    <p className="text-xs font-mono text-forge-offwhite/90 leading-relaxed break-words bg-forge-navy/40 p-3 rounded-lg border border-forge-border/40">
+                      "{videoResult.finalVideoPrompt}"
+                    </p>
+
+                    <p className="text-3xs font-mono text-forge-muted">
+                      Compatible with Google Veo, Runway Gen-3 Alpha, and Luma Dream Machine.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
       </div>

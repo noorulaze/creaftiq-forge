@@ -273,6 +273,71 @@ export interface GeneratedCreativeImage {
   errorMessage?: string
 }
 
+// ──────────────────────────────────────────────────────────────
+// Video Creation Types
+// ──────────────────────────────────────────────────────────────
+export type VideoType =
+  | 'Advertisement'
+  | 'Product Promo'
+  | 'Social Media Reel'
+  | 'Brand Launch'
+  | 'Cinematic Concept'
+  | 'Website Hero Video'
+
+export type VideoDuration = '5 seconds' | '10 seconds' | '15 seconds' | '30 seconds'
+export type VideoFormat = '9:16 Vertical' | '16:9 Landscape' | '1:1 Square'
+export type VideoStyle =
+  | 'Cinematic'
+  | 'Premium'
+  | 'Minimal'
+  | 'Youthful'
+  | 'Editorial'
+  | 'Bold'
+  | 'Documentary'
+
+export interface VideoScene {
+  sceneNumber: number
+  time: string
+  visual: string
+  cameraMovement: string
+  transition: string
+  onScreenText: string
+}
+
+export interface VideoGenerationOutput {
+  title: string
+  concept: string
+  duration: string
+  aspectRatio: string
+  visualStyle: string
+  voiceover: string
+  musicMood: string
+  scenes: VideoScene[]
+  finalVideoPrompt: string
+  videoUrl?: string
+  status: 'idle' | 'generating' | 'ready' | 'not_configured' | 'error'
+  errorMessage?: string
+  createdAt?: string
+}
+
+export interface VideoGenerationInput {
+  videoType: VideoType
+  duration: VideoDuration
+  format: VideoFormat
+  style: VideoStyle
+  voiceoverText?: string
+  musicMood?: string
+  visualInstruction?: string
+  projectName?: string
+  idea?: string
+  industry?: string
+  targetAudience?: string
+  brandPersonality?: string[]
+  visualKeywords?: string[]
+  colorPalette?: ColorSwatch[]
+  mood?: string
+}
+
 export interface CreativeDirectionOutput {
   colorPalette: ColorSwatch[]
   typographyDirection: string | TypographyDirectionDetails
@@ -285,6 +350,7 @@ export interface CreativeDirectionOutput {
   imageDetails?: ImageDirectionDetails
   uiDetails?: UIDirectionDetails
   generatedImage?: GeneratedCreativeImage
+  generatedVideo?: VideoGenerationOutput
 }
 
 // ──────────────────────────────────────────────────────────────

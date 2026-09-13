@@ -177,6 +177,54 @@ export function getMockResponse(operation: string, input: unknown): unknown {
         brandPersonality:     ['Bold', 'Authentic', 'Considered', 'Community-driven', 'Premium', 'Approachable'],
       }
 
+    case 'generateCreativeVideo': {
+      const data = (input || {}) as Record<string, any>
+      return {
+        title: `${data.projectName || 'Forge'} — ${data.videoType || 'Cinematic Concept'}`,
+        concept: `An atmospheric visual narrative exploring the genesis of ${data.projectName || 'this project'}, contrasting raw obsidian textures with electric blue pulses of digital clarity.`,
+        duration: data.duration || '15 seconds',
+        aspectRatio: data.format || '16:9 Landscape',
+        visualStyle: data.style || 'Cinematic',
+        voiceover: data.voiceoverText || 'Every breakthrough begins in the dark. Raw ideas, tempered with precision, forged into the future.',
+        musicMood: data.musicMood || 'Deep ambient bass swelling into a crisp, rhythmic electronic cadence with warm analogue warmth.',
+        scenes: [
+          {
+            sceneNumber: 1,
+            time: '0:00 - 0:03',
+            visual: 'Extreme macro close-up on matte obsidian stone texture. A thin line of electric blue light cuts across the surface.',
+            cameraMovement: 'Slow tracking push-in with shallow depth of field (f/1.4)',
+            transition: 'Subtle match dissolve',
+            onScreenText: data.projectName ? data.projectName.toUpperCase() : 'ONE RAW IDEA',
+          },
+          {
+            sceneNumber: 2,
+            time: '0:03 - 0:07',
+            visual: 'Human creator focused intently in a dimly lit studio, tactile prototypes and blueprints illuminated by cool monitor glow.',
+            cameraMovement: 'Low angle steady cam slowly drifting right',
+            transition: 'Quick cut on motion',
+            onScreenText: 'TEMPERED WITH INTENT',
+          },
+          {
+            sceneNumber: 3,
+            time: '0:07 - 0:11',
+            visual: 'Dynamic interplay of architectural typography and UI cards materializing out of deep obsidian negative space.',
+            cameraMovement: 'Smooth cinematic orbit with gentle tilt',
+            transition: 'Whip pan to horizon',
+            onScreenText: 'A CLEAR DIGITAL DIRECTION',
+          },
+          {
+            sceneNumber: 4,
+            time: '0:11 - 0:15',
+            visual: 'Wide cinematic landscape under midnight sky, distant mountain ridge contoured by an electric blue vector beacon.',
+            cameraMovement: 'Slow crane pull-back revealing endless horizon',
+            transition: 'Fade to black with glowing vector mark',
+            onScreenText: 'CREAFTIQ FORGE',
+          },
+        ],
+        finalVideoPrompt: `Cinematic 35mm film footage, documentary realism, high optical contrast. Architectural shots of ${data.projectName || 'creative studio'} in deep obsidian and midnight navy shadows with single electric blue vector rim highlights. Tactile textures, matte concrete, warm tungsten interior lamps. Smooth dolly push-in, natural motion blur, zero digital distortion, no fake stock video smiling, no watermarks, no warped letters.`,
+      }
+    }
+
     case 'refineSection':
       // Return a slightly modified version of whatever was passed in
       return (input as Record<string, unknown>)?.currentContent || {}
