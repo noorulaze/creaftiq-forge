@@ -45,29 +45,22 @@ export default function App() {
         <Route path="/login"    element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
+        {/* Forge routes */}
+        <Route path="/forge/new" element={<CreateProjectPage />} />
+        <Route path="/forge/:projectId" element={<WorkspacePage />} />
+        <Route path="/forge/:projectId/dna" element={<IdeaDNAPage />} />
+
         {/* Protected routes */}
         <Route
           path="/dashboard"
           element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
-        />
-        <Route
-          path="/forge/new"
-          element={<ProtectedRoute><CreateProjectPage /></ProtectedRoute>}
-        />
-        <Route
-          path="/forge/:projectId"
-          element={<ProtectedRoute><WorkspacePage /></ProtectedRoute>}
-        />
-        <Route
-          path="/forge/:projectId/dna"
-          element={<ProtectedRoute><IdeaDNAPage /></ProtectedRoute>}
         />
       </Route>
 
       {/* Forging page — full screen, no navbar */}
       <Route
         path="/forge/:projectId/processing"
-        element={<ProtectedRoute><ForgingPage /></ProtectedRoute>}
+        element={<ForgingPage />}
       />
 
       {/* Fallback */}

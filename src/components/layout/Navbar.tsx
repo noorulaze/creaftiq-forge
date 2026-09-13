@@ -9,9 +9,9 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const navLinks = [
-    { label: 'HOW IT WORKS', href: '#how-it-works' },
+    { label: 'PROCESS', href: '#process' },
     { label: 'FEATURES', href: '#features' },
-    { label: 'ABOUT', href: '#about' },
+    { label: 'WORKSPACE', href: '#preview' },
   ]
 
   return (
