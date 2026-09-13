@@ -6,9 +6,11 @@ import { Button, Badge, Modal, EmptyState, SkeletonCard, ErrorState } from '@/co
 import { useAuthStore } from '@/store/useAuthStore'
 import { useForgeStore } from '@/store/useForgeStore'
 import { subscribeToUserProjects, deleteProject, renameProject, createProject } from '@/services/firestore'
+import { isFirebaseConfigured } from '@/services/firebase'
 import type { Project, ProjectStatus } from '@/types'
 import { cn } from '@/utils/cn'
 import toast from 'react-hot-toast'
+
 
 // ─── Status Badge ────────────────────────────────────────────
 function StatusBadge({ status }: { status: ProjectStatus }) {
@@ -264,7 +266,20 @@ export function DashboardPage() {
         {/* Header */}
         <div className="flex items-start justify-between mb-10">
           <div>
-            <p className="section-label mb-2">WORKSPACE</p>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="section-label mb-0">WORKSPACE</p>
+              <span className="text-forge-border">•</span>
+              {isFirebaseConfigured ? (
+                <span className="inline-flex items-center gap-1 text-3xs font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>FIRESTORE SYNC ACTIVE</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-navy text-forge-muted border border-forge-border">
+                  <span>LOCAL WORKSPACE MODE</span>
+                </span>
+              )}
+            </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-forge-white tracking-tight">My Forges</h1>
             <p className="text-forge-muted text-sm mt-2">Your creative workspace. All your ideas in one place.</p>
           </div>
@@ -278,6 +293,7 @@ export function DashboardPage() {
             New Forge
           </Button>
         </div>
+
 
         {/* Content */}
         {loading ? (
