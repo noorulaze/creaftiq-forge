@@ -5,13 +5,14 @@ import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
 import { useAuthStore } from '@/store/useAuthStore'
 import { Spinner } from '@/components/shared'
 
-// Pages — lazy would be ideal in production; direct imports for simplicity
+// Pages
 import { LandingPage }       from '@/pages/LandingPage'
 import { LoginPage }         from '@/pages/LoginPage'
 import { RegisterPage }      from '@/pages/RegisterPage'
 import { DashboardPage }     from '@/pages/DashboardPage'
 import { CreateProjectPage } from '@/pages/CreateProjectPage'
 import { ForgingPage }       from '@/pages/ForgingPage'
+import { IdeaDNAPage }       from '@/pages/IdeaDNAPage'
 import { WorkspacePage }     from '@/pages/WorkspacePage'
 
 export default function App() {
@@ -56,6 +57,10 @@ export default function App() {
         <Route
           path="/forge/:projectId"
           element={<ProtectedRoute><WorkspacePage /></ProtectedRoute>}
+        />
+        <Route
+          path="/forge/:projectId/dna"
+          element={<ProtectedRoute><IdeaDNAPage /></ProtectedRoute>}
         />
       </Route>
 

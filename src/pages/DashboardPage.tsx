@@ -114,10 +114,24 @@ function ProjectCard({
       {/* Idea preview */}
       <p className="text-forge-muted text-xs leading-relaxed line-clamp-2 mb-4">{project.idea}</p>
 
-      {/* Date */}
-      <div className="flex items-center gap-1 text-forge-muted/60 text-xs">
-        <Calendar size={11} />
-        <span>{formattedDate}</span>
+      {/* Footer bar with Last Updated & Continue button */}
+      <div className="flex items-center justify-between pt-3 border-t border-forge-border/60">
+        <div className="flex items-center gap-1.5 text-forge-muted/70 text-2xs font-mono">
+          <Calendar size={11} />
+          <span>Updated {formattedDate}</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            navigate(`/forge/${project.id}`)
+          }}
+          className="inline-flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider text-forge-blue hover:text-forge-blue-light transition-colors"
+        >
+          <span>Continue</span>
+          <FolderOpen size={11} />
+        </button>
       </div>
     </motion.div>
   )

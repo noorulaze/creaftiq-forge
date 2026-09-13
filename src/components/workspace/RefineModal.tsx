@@ -1,16 +1,15 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { Modal, Button } from '@/components/shared'
 import type { BlueprintSection } from '@/types'
 import { cn } from '@/utils/cn'
 
 const PRESETS = [
-  { id: 'more-premium',      label: 'More premium'      },
-  { id: 'more-youthful',     label: 'More youthful'     },
-  { id: 'more-minimal',      label: 'More minimal'      },
-  { id: 'more-bold',         label: 'More bold'         },
-  { id: 'more-professional', label: 'More professional' },
-  { id: 'simplify',          label: 'Simplify'          },
+  { id: 'more-premium',      label: 'Make it more premium'      },
+  { id: 'more-youthful',     label: 'Make it more youthful'     },
+  { id: 'more-minimal',      label: 'Make it more minimal'      },
+  { id: 'more-bold',         label: 'Make it more bold'         },
+  { id: 'more-professional', label: 'Make it more professional' },
+  { id: 'simplify',          label: 'Simplify'                  },
 ]
 
 interface RefineModalProps {
@@ -37,41 +36,51 @@ export function RefineModal({ open, onClose, section, onRefine, loading = false 
   return (
     <Modal open={open} onClose={onClose} title={`REFINE — ${section.toUpperCase()}`} size="md">
       <div className="space-y-5">
-        <p className="text-forge-muted text-sm">
-          Choose a direction or write your own instruction for this section.
+        <p className="text-forge-muted text-xs leading-relaxed">
+          Select an aesthetic adjustment preset or specify a custom refinement prompt for the <span className="text-forge-white font-medium">{section}</span> section.
         </p>
 
-        {/* Preset pills */}
-        <div className="flex flex-wrap gap-2">
-          {PRESETS.map(preset => (
-            <button
-              key={preset.id}
-              onClick={() => setSelected(selected === preset.id ? null : preset.id)}
-              className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
-                selected === preset.id
-                  ? 'bg-forge-blue border-forge-blue text-white'
-                  : 'bg-forge-surface border-forge-border text-forge-muted hover:text-forge-white hover:border-forge-border2',
-              )}
-            >
-              {preset.label}
-            </button>
-          ))}
+        {/* Preset options */}
+        <div className="space-y-1.5">
+          <label className="forge-label text-2xs">PRESET ADJUSTMENTS</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {PRESETS.map(preset => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => {
+                  setSelected(selected === preset.label ? null : preset.label)
+                  setCustom('')
+                }}
+                className={cn(
+                  'px-3 py-2 rounded-lg text-xs font-medium border text-left transition-all duration-150',
+                  selected === preset.label
+                    ? 'bg-forge-blue/20 border-forge-blue text-forge-white'
+                    : 'bg-forge-surface border-forge-border text-forge-muted hover:text-forge-white hover:border-forge-border2',
+                )}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Custom instruction */}
         <div>
-          <label className="forge-label">Custom Instruction</label>
+          <label className="forge-label text-2xs">CUSTOM INSTRUCTION</label>
           <textarea
             value={custom}
-            onChange={e => { setCustom(e.target.value); setSelected('custom') }}
-            placeholder="Make it more conversational and direct..."
-            className="forge-input resize-none h-20 text-sm"
+            onChange={e => {
+              setCustom(e.target.value)
+              setSelected('custom')
+            }}
+            placeholder="e.g. Tone down corporate language, write in direct short sentences, add high-contrast visuals..."
+            className="forge-input resize-none h-20 text-xs"
             disabled={loading}
           />
         </div>
 
-        {/* Actions */}
+        {/* Action buttons */}
         <div className="flex gap-2 pt-1">
           <Button variant="secondary" size="md" fullWidth onClick={onClose} disabled={loading}>
             Cancel
@@ -83,8 +92,9 @@ export function RefineModal({ open, onClose, section, onRefine, loading = false 
             loading={loading}
             disabled={!instruction.trim()}
             onClick={handleRefine}
+            className="text-xs font-semibold tracking-wider uppercase"
           >
-            Refine
+            Apply Refinement
           </Button>
         </div>
       </div>
