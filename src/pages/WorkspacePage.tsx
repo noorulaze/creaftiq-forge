@@ -235,6 +235,10 @@ export function WorkspacePage() {
                     <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
                     <span>READY</span>
                   </span>
+                  <span className="text-forge-border hidden sm:inline">•</span>
+                  <span className="hidden sm:inline-flex items-center gap-1 text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-navy text-forge-muted border border-forge-border">
+                    <span>LOCAL PROTOTYPE MODE</span>
+                  </span>
                 </div>
                 <h1 className="text-base sm:text-lg font-bold text-forge-white truncate tracking-tight mt-0.5">
                   {project?.name || 'Untitled Forge'}
@@ -279,7 +283,7 @@ export function WorkspacePage() {
       </div>
 
       {/* ============================================================ */}
-      {/* Tab Content Display Matrix                                    */}
+      {/* Tab Content Display Matrix with AnimatePresence Transitions  */}
       {/* ============================================================ */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {outputsLoading ? (
@@ -290,92 +294,96 @@ export function WorkspacePage() {
             </span>
           </div>
         ) : (
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-          >
-            {activeTab === 'overview' && (
-              <OverviewTab
-                projectName={project?.name || ''}
-                idea={project?.idea || ''}
-                ideaDna={outputs?.ideaDna || null}
-                onNavigateTab={(t) => setActiveTab(t as ExtendedWorkspaceTab)}
-                onRefine={() => handleOpenRefine('brand')}
-                onRegenerate={() => handleRegenerateSection('brand')}
-              />
-            )}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              {activeTab === 'overview' && (
+                <OverviewTab
+                  projectName={project?.name || ''}
+                  idea={project?.idea || ''}
+                  ideaDna={outputs?.ideaDna || null}
+                  onNavigateTab={(t) => setActiveTab(t as ExtendedWorkspaceTab)}
+                  onRefine={() => handleOpenRefine('brand')}
+                  onRegenerate={() => handleRegenerateSection('brand')}
+                  onSave={handleSaveProject}
+                />
+              )}
 
-            {activeTab === 'brand' && (
-              <BrandTab
-                brand={outputs?.brand || null}
-                loading={outputsLoading}
-                onRefine={() => handleOpenRefine('brand')}
-                onRegenerate={() => handleRegenerateSection('brand')}
-                onSave={handleSaveProject}
-              />
-            )}
+              {activeTab === 'brand' && (
+                <BrandTab
+                  brand={outputs?.brand || null}
+                  loading={outputsLoading}
+                  onRefine={() => handleOpenRefine('brand')}
+                  onRegenerate={() => handleRegenerateSection('brand')}
+                  onSave={handleSaveProject}
+                />
+              )}
 
-            {activeTab === 'product' && (
-              <ProductTab
-                product={outputs?.product || null}
-                loading={outputsLoading}
-                onRefine={() => handleOpenRefine('product')}
-                onRegenerate={() => handleRegenerateSection('product')}
-                onSave={handleSaveProject}
-              />
-            )}
+              {activeTab === 'product' && (
+                <ProductTab
+                  product={outputs?.product || null}
+                  loading={outputsLoading}
+                  onRefine={() => handleOpenRefine('product')}
+                  onRegenerate={() => handleRegenerateSection('product')}
+                  onSave={handleSaveProject}
+                />
+              )}
 
-            {activeTab === 'website' && (
-              <WebsiteTab
-                website={outputs?.website || null}
-                loading={outputsLoading}
-                onRefine={() => handleOpenRefine('website')}
-                onRegenerate={() => handleRegenerateSection('website')}
-                onSave={handleSaveProject}
-              />
-            )}
+              {activeTab === 'website' && (
+                <WebsiteTab
+                  website={outputs?.website || null}
+                  loading={outputsLoading}
+                  onRefine={() => handleOpenRefine('website')}
+                  onRegenerate={() => handleRegenerateSection('website')}
+                  onSave={handleSaveProject}
+                />
+              )}
 
-            {activeTab === 'content' && (
-              <ContentTab
-                content={outputs?.content || null}
-                loading={outputsLoading}
-                onRefine={() => handleOpenRefine('content')}
-                onRegenerate={() => handleRegenerateSection('content')}
-                onSave={handleSaveProject}
-              />
-            )}
+              {activeTab === 'content' && (
+                <ContentTab
+                  content={outputs?.content || null}
+                  loading={outputsLoading}
+                  onRefine={() => handleOpenRefine('content')}
+                  onRegenerate={() => handleRegenerateSection('content')}
+                  onSave={handleSaveProject}
+                />
+              )}
 
-            {activeTab === 'marketing' && (
-              <MarketingTab
-                marketing={outputs?.marketing || null}
-                loading={outputsLoading}
-                onRefine={() => handleOpenRefine('marketing')}
-                onRegenerate={() => handleRegenerateSection('marketing')}
-                onSave={handleSaveProject}
-              />
-            )}
+              {activeTab === 'marketing' && (
+                <MarketingTab
+                  marketing={outputs?.marketing || null}
+                  loading={outputsLoading}
+                  onRefine={() => handleOpenRefine('marketing')}
+                  onRegenerate={() => handleRegenerateSection('marketing')}
+                  onSave={handleSaveProject}
+                />
+              )}
 
-            {activeTab === 'roadmap' && (
-              <RoadmapTab
-                loading={outputsLoading}
-                onRefine={() => handleOpenRefine('roadmap')}
-                onRegenerate={() => handleRegenerateSection('roadmap')}
-                onSave={handleSaveProject}
-              />
-            )}
+              {activeTab === 'roadmap' && (
+                <RoadmapTab
+                  loading={outputsLoading}
+                  onRefine={() => handleOpenRefine('roadmap')}
+                  onRegenerate={() => handleRegenerateSection('roadmap')}
+                  onSave={handleSaveProject}
+                />
+              )}
 
-            {activeTab === 'creativeDirection' && (
-              <CreativeBoard
-                creativeDirection={outputs?.creativeDirection || null}
-                loading={outputsLoading}
-                onRefine={() => handleOpenRefine('creativeDirection')}
-                onRegenerate={() => handleRegenerateSection('creativeDirection')}
-                onSave={handleSaveProject}
-              />
-            )}
-          </motion.div>
+              {activeTab === 'creativeDirection' && (
+                <CreativeBoard
+                  creativeDirection={outputs?.creativeDirection || null}
+                  loading={outputsLoading}
+                  onRefine={() => handleOpenRefine('creativeDirection')}
+                  onRegenerate={() => handleRegenerateSection('creativeDirection')}
+                  onSave={handleSaveProject}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
 

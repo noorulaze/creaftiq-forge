@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Copy, Sparkles, RefreshCw, BookmarkCheck } from 'lucide-react'
+import { Copy, Sparkles, RefreshCw, BookmarkCheck, Check } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import toast from 'react-hot-toast'
 
@@ -22,11 +22,23 @@ export function ActionBar({
   className,
 }: ActionBarProps) {
   const [saved, setSaved] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
   function handleCopy() {
     if (copyContent) {
       navigator.clipboard.writeText(copyContent)
+      setCopied(true)
       toast.success(`${sectionTitle} copied to clipboard.`)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  function handleRegenerateClick() {
+    if (onRegenerate) {
+      setRefreshing(true)
+      onRegenerate()
+      setTimeout(() => setRefreshing(false), 800)
     }
   }
 
@@ -43,11 +55,16 @@ export function ActionBar({
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium uppercase tracking-wider text-forge-muted hover:text-forge-white bg-forge-navy/80 hover:bg-forge-surface border border-forge-border transition-colors"
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium uppercase tracking-wider transition-colors border',
+            copied
+              ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30'
+              : 'text-forge-muted hover:text-forge-white bg-forge-navy/80 hover:bg-forge-surface border-forge-border'
+          )}
           title="Copy Content"
         >
-          <Copy size={12} />
-          <span>Copy</span>
+          {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+          <span>{copied ? 'Copied' : 'Copy'}</span>
         </button>
       )}
 
@@ -66,11 +83,11 @@ export function ActionBar({
       {onRegenerate && (
         <button
           type="button"
-          onClick={onRegenerate}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium uppercase tracking-wider text-forge-muted hover:text-forge-white bg-forge-navy/80 hover:bg-forge-surface border border-forge-border transition-colors"
-          title="Regenerate"
+          onClick={handleRegenerateClick}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium uppercase tracking-wider text-forge-muted hover:text-forge-white bg-forge-navy/80 hover:bg-forge-surface border border-forge-border transition-colors group"
+          title="Regenerate Section"
         >
-          <RefreshCw size={12} />
+          <RefreshCw size={12} className={cn('transition-transform', refreshing && 'animate-spin text-forge-blue')} />
           <span>Regenerate</span>
         </button>
       )}
