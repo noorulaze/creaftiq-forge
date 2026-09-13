@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 import { useForgeStore } from '@/store/useForgeStore'
 import { getProject, subscribeToProjectOutputs, saveProjectOutputs } from '@/services/firestore'
+import { isFirebaseConfigured } from '@/services/firebase'
 import { getClientMockResponse } from '@/services/mockClient'
 
 import { WorkspaceNav, type ExtendedWorkspaceTab } from '@/components/workspace/WorkspaceNav'
@@ -237,10 +238,15 @@ export function WorkspacePage() {
                   </span>
                   <span className="text-forge-border hidden sm:inline">•</span>
                   <span className="hidden sm:inline-flex items-center gap-1 text-3xs font-mono uppercase px-2 py-0.5 rounded bg-forge-navy text-forge-muted border border-forge-border">
-                    <span>LOCAL PROTOTYPE MODE</span>
+                    {isFirebaseConfigured ? (
+                      <span className="text-emerald-400 font-semibold">FIREBASE SYNC ACTIVE</span>
+                    ) : (
+                      <span>LOCAL PROTOTYPE MODE</span>
+                    )}
                   </span>
                 </div>
                 <h1 className="text-base sm:text-lg font-bold text-forge-white truncate tracking-tight mt-0.5">
+
                   {project?.name || 'Untitled Forge'}
                 </h1>
               </div>

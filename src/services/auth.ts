@@ -10,7 +10,7 @@ import {
   type User,
 } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { auth, db } from './firebase'
+import { auth, db, isFirebaseConfigured } from './firebase'
 
 const DEMO_USER_KEY = 'forge_demo_user'
 
@@ -54,7 +54,10 @@ export async function registerUser(
 
     return user
   } catch (error: unknown) {
-    // Fallback: create a local demo session
+    if (isFirebaseConfigured) {
+      throw error
+    }
+    // Fallback: create a local demo session if Firebase is not yet configured
     const mockUser = {
       uid: 'user_' + Date.now(),
       email,
@@ -75,7 +78,11 @@ export async function loginUser(email: string, password: string): Promise<User> 
   try {
     const credential = await signInWithEmailAndPassword(auth, email, password)
     return credential.user
-  } catch {
+  } catch (error: unknown) {
+    if (isFirebaseConfigured) {
+      throw error
+    }
+    // Fallback: local demo login when Firebase is not configured
     const mockUser = {
       uid: 'user_demo_1',
       email,
@@ -90,6 +97,7 @@ export async function loginUser(email: string, password: string): Promise<User> 
     return mockUser
   }
 }
+
 
 // ─── Logout ───────────────────────────────────────────────────
 export async function logoutUser(): Promise<void> {

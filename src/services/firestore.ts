@@ -8,6 +8,7 @@ import {
   getDoc,
   getDocs,
   updateDoc,
+  setDoc,
   deleteDoc,
   query,
   where,
@@ -199,12 +200,12 @@ export async function saveProjectOutputs(
       ...outputs,
       updatedAt: serverTimestamp(),
     }).catch(async () => {
-      const { setDoc } = await import('firebase/firestore')
       await setDoc(outputsRef, {
         ...outputs,
         updatedAt: serverTimestamp(),
       })
     })
+
   } catch {
     // Local storage
     try {

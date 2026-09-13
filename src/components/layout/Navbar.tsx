@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ArrowRight } from 'lucide-react'
+import { Menu, X, ArrowRight, LogOut, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/shared'
+import { useAuthStore } from '@/store/useAuthStore'
+import { logoutUser } from '@/services/auth'
 import { cn } from '@/utils/cn'
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { user } = useAuthStore()
 
   const navLinks = [
     { label: 'PROCESS', href: '#process' },
@@ -45,6 +48,31 @@ export function Navbar() {
 
           {/* Right Action Button */}
           <div className="hidden md:flex items-center gap-4">
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="text-2xs font-semibold tracking-widest uppercase text-forge-muted hover:text-forge-white transition-colors"
+                >
+                  DASHBOARD
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => logoutUser()}
+                  className="text-2xs font-semibold tracking-widest uppercase text-forge-muted hover:text-red-400 transition-colors"
+                >
+                  SIGN OUT
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="text-2xs font-semibold tracking-widest uppercase text-forge-muted hover:text-forge-white transition-colors"
+              >
+                SIGN IN
+              </Link>
+            )}
+
             <Link to="/forge/new">
               <Button
                 variant="primary"
@@ -94,13 +122,43 @@ export function Navbar() {
                 </a>
               ))}
             </div>
-            <div className="pt-2 border-t border-forge-border/60">
+
+            <div className="pt-2 border-t border-forge-border/60 flex flex-col gap-2.5">
+              {user ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-forge-white py-1"
+                  >
+                    <LayoutDashboard size={14} className="text-forge-blue" />
+                    <span>DASHBOARD</span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => { logoutUser(); setMobileOpen(false) }}
+                    className="flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-red-400 py-1 text-left"
+                  >
+                    <LogOut size={14} />
+                    <span>SIGN OUT</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-xs font-semibold tracking-widest uppercase text-forge-white py-1"
+                >
+                  SIGN IN
+                </Link>
+              )}
+
               <Link to="/forge/new" onClick={() => setMobileOpen(false)}>
                 <Button
                   variant="primary"
                   size="md"
                   fullWidth
-                  className="text-xs font-semibold tracking-widest uppercase"
+                  className="text-xs font-semibold tracking-widest uppercase mt-1"
                 >
                   START FORGING
                 </Button>
@@ -112,3 +170,4 @@ export function Navbar() {
     </header>
   )
 }
+

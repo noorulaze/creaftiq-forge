@@ -139,7 +139,7 @@ export function IdeaDNAPage() {
     if (!decodedData) return
 
     const copyText = `====================================================
-CREAFTIQ FORGE — IDEA DNA ANALYSIS
+CREAFTIQ FORGE ï¿½ IDEA DNA ANALYSIS
 Project: ${project?.name || 'Project'}
 Status: Decoded
 Mock Clarity Rating: ${decodedData.mockClarityScore}% (Local Estimate)
@@ -165,7 +165,7 @@ Tags: ${decodedData.personalityTags.join(', ')}
 Voice: ${decodedData.personalitySummary}
 
 7. IDEA CLARITY:
-${decodedData.mockClarityScore}% — Concept definition and market direction are clearly articulated.
+${decodedData.mockClarityScore}% ï¿½ Concept definition and market direction are clearly articulated.
 (Note: Visual clarity rating is a mock heuristic estimate, not a real AI calculation).
 `
 
@@ -337,7 +337,7 @@ ${decodedData.mockClarityScore}% — Concept definition and market direction are c
             </span>
             {project?.context?.industry && (
               <>
-                <span className="text-forge-border">•</span>
+                <span className="text-forge-border">ï¿½</span>
                 <span className="px-2 py-0.5 rounded bg-forge-surface border border-forge-border text-forge-muted">
                   INDUSTRY: <span className="text-forge-white">{project.context.industry}</span>
                 </span>
@@ -345,7 +345,7 @@ ${decodedData.mockClarityScore}% — Concept definition and market direction are c
             )}
             {project?.context?.targetAudience && (
               <>
-                <span className="text-forge-border hidden sm:inline">•</span>
+                <span className="text-forge-border hidden sm:inline">ï¿½</span>
                 <span className="px-2 py-0.5 rounded bg-forge-surface border border-forge-border text-forge-muted">
                   TARGET: <span className="text-forge-white">{project.context.targetAudience}</span>
                 </span>
@@ -353,13 +353,13 @@ ${decodedData.mockClarityScore}% — Concept definition and market direction are c
             )}
             {project?.context?.mainGoal && (
               <>
-                <span className="text-forge-border hidden sm:inline">•</span>
+                <span className="text-forge-border hidden sm:inline">ï¿½</span>
                 <span className="px-2 py-0.5 rounded bg-forge-surface border border-forge-border text-forge-muted">
                   GOAL: <span className="text-forge-white">{project.context.mainGoal}</span>
                 </span>
               </>
             )}
-            <span className="text-forge-border">•</span>
+            <span className="text-forge-border">ï¿½</span>
             <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
               SYNTHESIZED
             </span>
