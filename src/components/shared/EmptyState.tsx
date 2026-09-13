@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion'
-import type { LucideIcon } from 'lucide-react'
+import type { ComponentType } from 'react'
 import { cn } from '@/utils/cn'
 
 interface EmptyStateProps {
-  icon?: LucideIcon
+  icon?: ComponentType<{ size?: number | string; className?: string }>
   title: string
   description?: string
   action?: React.ReactNode

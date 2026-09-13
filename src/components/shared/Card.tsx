@@ -1,8 +1,8 @@
-import { motion } from 'framer-motion'
+import { motion, type HTMLMotionProps } from 'framer-motion'
 import type { HTMLAttributes } from 'react'
 import { cn } from '@/utils/cn'
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
+interface CardProps extends HTMLMotionProps<'div'> {
   hoverable?: boolean
   noPadding?: boolean
   glow?: boolean

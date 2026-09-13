@@ -132,9 +132,10 @@ export function RoadmapTab({
         const updatedTasks = p.tasks.map(t => (t.id === taskId ? { ...t, completed: !t.completed } : t))
         const allDone = updatedTasks.every(t => t.completed)
         const anyDone = updatedTasks.some(t => t.completed)
+        const status: PhaseData['status'] = allDone ? 'Complete' : anyDone ? 'In progress' : 'Not started'
         return {
           ...p,
-          status: allDone ? 'Complete' : anyDone ? 'In progress' : 'Not started',
+          status,
           tasks: updatedTasks,
         }
       })
