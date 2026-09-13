@@ -9,6 +9,7 @@ interface WebsiteTabProps {
   onRefine: () => void
   onRegenerate: () => void
   onSave?: () => void
+  onBuildWebsite?: () => void
 }
 
 const WIREFRAME_SECTIONS = [
@@ -64,6 +65,7 @@ export function WebsiteTab({
   onRefine,
   onRegenerate,
   onSave,
+  onBuildWebsite,
 }: WebsiteTabProps) {
   const [selectedSection, setSelectedSection] = useState<string>('hero')
 
@@ -91,6 +93,36 @@ Mobile Specs: Built for 320px-390px thumb-zone comfort with zero horizontal scro
       onSave={onSave}
     >
       <div className="space-y-8">
+
+        {/* ============================================================ */}
+        {/* AI Website Builder Primary Action Banner                     */}
+        {/* ============================================================ */}
+        <div className="rounded-2xl border border-forge-blue/40 bg-gradient-to-r from-forge-navy via-forge-surface to-forge-navy p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-sm shadow-forge-blue/15">
+          <div className="space-y-1 max-w-xl">
+            <div className="flex items-center gap-2">
+              <Globe size={15} className="text-forge-blue" />
+              <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                WEBSITE GENERATION WORKSPACE
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-forge-white tracking-tight uppercase">
+              Ready to construct this site with AI?
+            </h3>
+            <p className="text-2xs sm:text-xs text-forge-muted font-light leading-relaxed">
+              Step into the Website Builder to configure your platform type, pick required pages, adjust styling, and compile production code specs.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onBuildWebsite}
+            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-forge-white bg-forge-blue hover:bg-forge-blue-light border border-forge-blue-light/30 shadow-blue-glow cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Globe size={14} />
+            <span>BUILD THIS WEBSITE</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
 
         {/* ============================================================ */}
         {/* 01 / Website Purpose                                         */}

@@ -411,3 +411,59 @@ export interface ForgingStageInfo {
 }
 
 export type WorkspaceTab = 'overview' | 'brand' | 'product' | 'website' | 'content' | 'marketing' | 'roadmap'
+
+// ──────────────────────────────────────────────────────────────
+// Website Builder Types & Request Spec
+// ──────────────────────────────────────────────────────────────
+export type WebsiteType =
+  | 'Business Website'
+  | 'Portfolio'
+  | 'Agency Website'
+  | 'Landing Page'
+  | 'E-commerce Concept'
+  | 'Educational Website'
+  | 'Event Website'
+  | 'Personal Brand Website'
+
+export type WebsitePageOption =
+  | 'Home'
+  | 'About'
+  | 'Services'
+  | 'Products'
+  | 'Projects'
+  | 'Pricing'
+  | 'Blog'
+  | 'Contact'
+  | 'FAQ'
+  | 'Custom Page'
+
+export type WebsiteVisualStyle =
+  | 'Premium'
+  | 'Minimal'
+  | 'Bold'
+  | 'Editorial'
+  | 'Youthful'
+  | 'Professional'
+  | 'Creative'
+
+export interface WebsiteBuilderProjectContext {
+  projectName: string
+  originalIdea: string
+  industry: string
+  targetAudience: string
+  mainGoal: string
+  ideaDNA: IdeaDNA | null
+  websiteBlueprint: WebsiteOutput | null
+  creativeDirection: CreativeDirectionOutput | null
+}
+
+export interface WebsiteBuilderRequest {
+  projectId: string
+  websiteType: WebsiteType | string
+  selectedPages: string[]
+  visualStyle: WebsiteVisualStyle | string
+  primaryCTA: string
+  extraInstructions?: string
+  projectContext: WebsiteBuilderProjectContext
+  createdAt?: string
+}

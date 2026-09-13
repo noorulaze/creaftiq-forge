@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Dna, BookmarkCheck, CheckCircle2, Loader2, AlertCircle, RefreshCw, LayoutDashboard } from 'lucide-react'
+import { ArrowLeft, Dna, BookmarkCheck, CheckCircle2, Loader2, AlertCircle, RefreshCw, LayoutDashboard, Globe } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 
@@ -242,6 +242,25 @@ export function WorkspacePage() {
     }
   }
 
+  // Handle BUILD THIS WEBSITE entry point
+  function handleBuildWebsite() {
+    if (!user) {
+      toast('Please sign in to build your website.', { icon: '🔒' })
+      navigate('/login', {
+        state: { from: { pathname: `/website-builder?projectId=${projectId}` } },
+      })
+      return
+    }
+
+    if (!projectId) {
+      toast.error('No project loaded.')
+      navigate('/forge/new')
+      return
+    }
+
+    navigate(`/website-builder?projectId=${projectId}`)
+  }
+
   if (error) {
     return (
       <div className="min-h-screen bg-forge-black pt-20 flex items-center justify-center">
@@ -300,8 +319,8 @@ export function WorkspacePage() {
               </div>
             </div>
 
-            {/* Right: My Forges Navigation + 4-State Save Project Button */}
-            <div className="flex items-center gap-2.5 flex-shrink-0">
+            {/* Right: My Forges Navigation + BUILD THIS WEBSITE + 4-State Save Project Button */}
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 flex-wrap">
               <Link
                 to="/my-forges"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase text-forge-muted hover:text-forge-white bg-forge-surface hover:bg-forge-surface2 border border-forge-border transition-colors"
@@ -310,6 +329,16 @@ export function WorkspacePage() {
                 <LayoutDashboard size={12} className="text-forge-blue" />
                 <span>MY FORGES</span>
               </Link>
+
+              <button
+                type="button"
+                onClick={handleBuildWebsite}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-2xs font-bold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light border border-forge-blue-light/30 shadow-blue-glow-sm cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+                title="Build working website from this blueprint"
+              >
+                <Globe size={12} className="text-forge-white" />
+                <span>BUILD THIS WEBSITE</span>
+              </button>
 
               {saveStatus === 'idle' && (
                 <Button
@@ -417,6 +446,7 @@ export function WorkspacePage() {
                   onRefine={() => handleOpenRefine('brand')}
                   onRegenerate={() => handleRegenerateSection('brand')}
                   onSave={handleSaveProject}
+                  onBuildWebsite={handleBuildWebsite}
                 />
               )}
 
@@ -447,6 +477,7 @@ export function WorkspacePage() {
                   onRefine={() => handleOpenRefine('website')}
                   onRegenerate={() => handleRegenerateSection('website')}
                   onSave={handleSaveProject}
+                  onBuildWebsite={handleBuildWebsite}
                 />
               )}
 

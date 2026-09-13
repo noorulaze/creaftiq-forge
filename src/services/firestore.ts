@@ -611,3 +611,46 @@ export function subscribeToProjectOutputs(
   }
 }
 
+// ─── Save Website Builder Specification ──────────────────────
+export async function saveWebsiteBuilderRequest(
+  projectId: string,
+  request: import('@/types').WebsiteBuilderRequest,
+  uid?: string,
+): Promise<void> {
+  const fieldsToSave: Record<string, unknown> = {
+    websiteRequest: request,
+    updatedAt: serverTimestamp(),
+  }
+
+  let saved = false
+  if (uid) {
+    try {
+      const userProjectRef = doc(db, 'users', uid, 'projects', projectId)
+      await setDoc(userProjectRef, fieldsToSave, { merge: true })
+      saved = true
+    } catch {
+      // Continue to fallback
+    }
+  }
+
+  try {
+    const projRef = doc(db, 'projects', projectId)
+    await setDoc(projRef, fieldsToSave, { merge: true })
+    saved = true
+  } catch {
+    // Ignored
+  }
+
+  try {
+    const key = `forge_website_spec_${projectId}`
+    localStorage.setItem(key, JSON.stringify(request))
+  } catch {
+    // Ignored
+  }
+
+  if (isFirebaseConfigured && uid && !saved) {
+    // If Firebase is configured, non-fatal fallback
+    console.warn('Could not persist websiteRequest to Firestore, kept in local storage')
+  }
+}
+

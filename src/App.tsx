@@ -15,6 +15,7 @@ import { CreateProjectPage } from '@/pages/CreateProjectPage'
 import { ForgingPage }       from '@/pages/ForgingPage'
 import { IdeaDNAPage }       from '@/pages/IdeaDNAPage'
 import { WorkspacePage }     from '@/pages/WorkspacePage'
+import { WebsiteBuilderPage } from '@/pages/WebsiteBuilderPage'
 
 export default function App() {
   const { initialize, initialized, loading } = useAuthStore()
@@ -55,6 +56,10 @@ export default function App() {
         <Route
           path="/my-forges"
           element={<ProtectedRoute><MyForgesPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/website-builder"
+          element={<ProtectedRoute><WebsiteBuilderPage /></ProtectedRoute>}
         />
         <Route
           path="/dashboard"

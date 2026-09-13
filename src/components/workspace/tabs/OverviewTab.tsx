@@ -82,6 +82,7 @@ interface OverviewTabProps {
   onRefine: () => void
   onRegenerate: () => void
   onSave?: () => void
+  onBuildWebsite?: () => void
 }
 
 export function OverviewTab({
@@ -92,6 +93,7 @@ export function OverviewTab({
   onRefine,
   onRegenerate,
   onSave,
+  onBuildWebsite,
 }: OverviewTabProps) {
   const summaryCopy = `PROJECT EXECUTIVE OVERVIEW: ${projectName}
 Core Concept: ${idea}
@@ -383,6 +385,36 @@ Mode: Local Prototype Synthesis`
             </p>
           </div>
 
+        </div>
+
+        {/* ============================================================ */}
+        {/* AI Website Builder Call to Action Banner                      */}
+        {/* ============================================================ */}
+        <div className="rounded-2xl border border-forge-blue/40 bg-gradient-to-r from-forge-navy via-forge-surface to-forge-navy p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm shadow-forge-blue/10">
+          <div className="space-y-1.5 max-w-xl">
+            <div className="flex items-center gap-2">
+              <Globe size={16} className="text-forge-blue animate-pulse" />
+              <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                READY FOR LAUNCH • AI WEBSITE BUILDER
+              </span>
+            </div>
+            <h3 className="text-lg font-bold text-forge-white tracking-tight uppercase">
+              Ready to turn this blueprint into an actual website?
+            </h3>
+            <p className="text-2xs sm:text-xs text-forge-muted font-light leading-relaxed">
+              Launch the digital experience engine to configure page wireframes, choose visual aesthetics, and generate an executable production specification from this project's Idea DNA.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onBuildWebsite}
+            className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-forge-white bg-forge-blue hover:bg-forge-blue-light border border-forge-blue-light/30 shadow-blue-glow cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Globe size={14} />
+            <span>BUILD THIS WEBSITE</span>
+            <ArrowRight size={13} />
+          </button>
         </div>
 
         {/* ============================================================ */}
