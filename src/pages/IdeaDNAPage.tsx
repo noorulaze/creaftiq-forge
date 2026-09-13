@@ -21,8 +21,10 @@ import {
 } from 'lucide-react'
 import { Button, SkeletonCard, Modal, EmptyState } from '@/components/shared'
 import { MountainBackdrop } from '@/components/landing/MountainBackdrop'
+import { useAuthStore } from '@/store/useAuthStore'
 import { getProject, getProjectOutputs, saveProjectOutputs } from '@/services/firestore'
 import type { Project, ProjectOutputs, IdeaDNA } from '@/types'
+
 import toast from 'react-hot-toast'
 
 interface DecodedIdeaState {
@@ -41,6 +43,7 @@ const DEFAULT_PERSONALITY_TAGS = ['Bold', 'Youthful', 'Trustworthy', 'Minimal', 
 export function IdeaDNAPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const { user } = useAuthStore()
 
   const [project, setProject] = useState<Project | null>(null)
   const [outputs, setOutputs] = useState<ProjectOutputs | null>(null)
@@ -62,8 +65,8 @@ export function IdeaDNAPage() {
 
     async function loadData() {
       try {
-        let currentProject = await getProject(activeId)
-        let currentOutputs = await getProjectOutputs(activeId)
+        let currentProject = await getProject(activeId, user?.uid)
+        let currentOutputs = await getProjectOutputs(activeId, user?.uid)
 
         // Fallback: check localStorage if firestore record is empty
         if (!currentProject) {
@@ -73,7 +76,7 @@ export function IdeaDNAPage() {
               const parsed = JSON.parse(pendingRaw)
               currentProject = {
                 id: activeId,
-                uid: 'user_demo_1',
+                uid: user?.uid || 'user_demo_1',
                 name: parsed.projectName || parsed.name || 'Kerala Streetwear Brand',
                 idea: parsed.ideaDescription || parsed.idea || 'A premium localized streetwear apparel label rooted in Kerala subculture.',
                 context: {
@@ -91,6 +94,7 @@ export function IdeaDNAPage() {
             // Ignored
           }
         }
+
 
         // Generate or synthesize structured analysis
         const ideaText = currentProject?.idea || 'A modern digital creative venture'

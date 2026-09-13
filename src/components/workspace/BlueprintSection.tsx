@@ -12,9 +12,10 @@ interface BlueprintSectionProps {
   copyContent?: string
   onRefine?: () => void
   onRegenerate?: () => void
-  onSave?: () => void
+  onSave?: () => Promise<void> | void
   className?: string
 }
+
 
 export function BlueprintSection({
   badge,

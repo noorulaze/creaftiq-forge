@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Sparkles, RefreshCw, BookmarkCheck, Check } from 'lucide-react'
+import { Copy, Sparkles, RefreshCw, BookmarkCheck, Check, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import toast from 'react-hot-toast'
 
@@ -8,7 +8,7 @@ interface ActionBarProps {
   copyContent?: string
   onRefine?: () => void
   onRegenerate?: () => void
-  onSave?: () => void
+  onSave?: () => Promise<void> | void
   className?: string
 }
 
@@ -20,7 +20,7 @@ export function ActionBar({
   onSave,
   className,
 }: ActionBarProps) {
-  const [saved, setSaved] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [copied, setCopied] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
 
@@ -41,12 +41,20 @@ export function ActionBar({
     }
   }
 
-  function handleSave() {
-    setSaved(true)
-    if (onSave) onSave()
-    toast.success(`${sectionTitle} saved.`)
-    setTimeout(() => setSaved(false), 2000)
+  async function handleSave() {
+    if (!onSave) return
+    setSaveStatus('saving')
+    try {
+      await onSave()
+      setSaveStatus('saved')
+      toast.success(`${sectionTitle} saved successfully.`)
+      setTimeout(() => setSaveStatus('idle'), 2500)
+    } catch {
+      setSaveStatus('error')
+      toast.error(`Failed to save ${sectionTitle}.`)
+    }
   }
+
 
   return (
     <div className={cn('flex items-center flex-wrap gap-2', className)}>
@@ -91,20 +99,58 @@ export function ActionBar({
         </button>
       )}
 
-      <button
-        type="button"
-        onClick={handleSave}
-        className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold uppercase tracking-wider transition-colors border cursor-pointer',
-          saved
-            ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30'
-            : 'text-forge-muted hover:text-forge-white bg-forge-navy/80 hover:bg-forge-surface border-forge-border'
-        )}
-        title="Save Project"
-      >
-        <BookmarkCheck size={12} className={saved ? 'text-emerald-400' : 'text-forge-muted'} />
-        <span>{saved ? 'SAVED' : 'SAVE PROJECT'}</span>
-      </button>
+      {saveStatus === 'idle' && (
+        <button
+          type="button"
+          onClick={handleSave}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold uppercase tracking-wider transition-colors border cursor-pointer text-forge-muted hover:text-forge-white bg-forge-navy/80 hover:bg-forge-surface border-forge-border"
+          title="Save Section"
+        >
+          <BookmarkCheck size={12} className="text-forge-muted" />
+          <span>SAVE PROJECT</span>
+        </button>
+      )}
+
+      {saveStatus === 'saving' && (
+        <button
+          type="button"
+          disabled
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold uppercase tracking-wider border text-forge-muted bg-forge-surface border-forge-border cursor-not-allowed"
+        >
+          <Loader2 size={12} className="animate-spin text-forge-blue" />
+          <span>Saving...</span>
+        </button>
+      )}
+
+      {saveStatus === 'saved' && (
+        <button
+          type="button"
+          onClick={handleSave}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold uppercase tracking-wider border cursor-pointer text-emerald-400 bg-emerald-500/15 border-emerald-500/30"
+          title="Saved successfully"
+        >
+          <Check size={12} className="text-emerald-400" />
+          <span>Saved successfully</span>
+        </button>
+      )}
+
+      {saveStatus === 'error' && (
+        <div className="flex items-center gap-1">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20">
+            <AlertCircle size={11} />
+            <span>Save failed</span>
+          </span>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs font-semibold uppercase tracking-wider text-forge-white bg-forge-blue hover:bg-forge-blue-light cursor-pointer transition-colors"
+          >
+            <RefreshCw size={11} />
+            <span>Retry</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
+

@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Dna, BookmarkCheck, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Dna, BookmarkCheck, CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+import { useAuthStore } from '@/store/useAuthStore'
 import { useForgeStore } from '@/store/useForgeStore'
 import { getProject, subscribeToProjectOutputs, saveProjectOutputs } from '@/services/firestore'
 import { isFirebaseConfigured } from '@/services/firebase'
@@ -25,9 +26,12 @@ import { ErrorState, Spinner, Badge, Button } from '@/components/shared'
 import type { BlueprintSection, Project, ProjectOutputs } from '@/types'
 import toast from 'react-hot-toast'
 
+export type SaveButtonStatus = 'idle' | 'saving' | 'saved' | 'error'
+
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const { currentOutputs, setCurrentOutputs, updateOutputs } = useForgeStore()
 
   const [activeTab, setActiveTab] = useState<ExtendedWorkspaceTab>('overview')
@@ -36,6 +40,9 @@ export function WorkspacePage() {
   const [outputsLoading, setOutputsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Save Project State Machine: 'idle' | 'saving' | 'saved' | 'error'
+  const [saveStatus, setSaveStatus] = useState<SaveButtonStatus>('idle')
+
   // Refine modal state
   const [refineOpen, setRefineOpen] = useState(false)
   const [refineTargetSection, setRefineTargetSection] = useState<BlueprintSection>('brand')
@@ -43,11 +50,12 @@ export function WorkspacePage() {
 
   const unsubRef = useRef<(() => void) | null>(null)
 
+
   // Load project metadata
   useEffect(() => {
     if (!projectId) return
 
-    getProject(projectId)
+    getProject(projectId, user?.uid)
       .then(p => {
         if (p) {
           setProject(p)
@@ -59,7 +67,7 @@ export function WorkspacePage() {
               const parsed = JSON.parse(raw)
               setProject({
                 id: projectId,
-                uid: 'user_demo_1',
+                uid: user?.uid || 'user_demo_1',
                 name: parsed.projectName || 'My Project',
                 idea: parsed.ideaDescription || '',
                 context: {
@@ -83,7 +91,7 @@ export function WorkspacePage() {
         setError('Failed to load workspace.')
         setProjectLoading(false)
       })
-  }, [projectId])
+  }, [projectId, user?.uid])
 
   // Real-time subscribe / fallback to client mock
   useEffect(() => {
@@ -108,13 +116,20 @@ export function WorkspacePage() {
           creativeDirection: getClientMockResponse('generateCreativeDirection', { idea }) as any,
         }
         setCurrentOutputs(mockData)
-        saveProjectOutputs(projectId, mockData).catch(() => {})
+        saveProjectOutputs(projectId, mockData, user?.uid, {
+          projectName: project?.name,
+          originalIdea: project?.idea,
+          industry: project?.context?.industry,
+          targetAudience: project?.context?.targetAudience,
+          mainGoal: project?.context?.mainGoal,
+        }).catch(() => {})
         setOutputsLoading(false)
       }
-    })
+    }, user?.uid)
 
     return () => unsubRef.current?.()
-  }, [projectId, project, setCurrentOutputs])
+  }, [projectId, project, setCurrentOutputs, user?.uid])
+
 
   // Open refinement panel for a given section
   function handleOpenRefine(section: BlueprintSection) {
@@ -174,7 +189,13 @@ export function WorkspacePage() {
 
       const update = { [section]: freshData } as Partial<ProjectOutputs>
       updateOutputs(update)
-      await saveProjectOutputs(projectId, update)
+      await saveProjectOutputs(projectId, update, user?.uid, {
+        projectName: project?.name,
+        originalIdea: project?.idea,
+        industry: project?.context?.industry,
+        targetAudience: project?.context?.targetAudience,
+        mainGoal: project?.context?.mainGoal,
+      })
       toast.success(`${section.toUpperCase()} regenerated.`)
     } catch {
       toast.error('Regeneration failed.')
@@ -183,14 +204,26 @@ export function WorkspacePage() {
     }
   }
 
-  // Save project button handler
+  // Save project button handler with 4 states: idle | saving | saved | error (with Retry)
   async function handleSaveProject() {
     if (!projectId || !currentOutputs) return
+    setSaveStatus('saving')
     try {
-      await saveProjectOutputs(projectId, currentOutputs)
-      toast.success('Project saved successfully.')
+      await saveProjectOutputs(projectId, currentOutputs, user?.uid, {
+        projectName: project?.name,
+        originalIdea: project?.idea,
+        industry: project?.context?.industry,
+        targetAudience: project?.context?.targetAudience,
+        mainGoal: project?.context?.mainGoal,
+      })
+      setSaveStatus('saved')
+      toast.success('Saved successfully.')
+      setTimeout(() => {
+        setSaveStatus(prev => (prev === 'saved' ? 'idle' : prev))
+      }, 2500)
     } catch {
-      toast.success('Project state saved locally.')
+      setSaveStatus('error')
+      toast.error('Save failed. Click Retry to attempt again.')
     }
   }
 
@@ -252,21 +285,63 @@ export function WorkspacePage() {
               </div>
             </div>
 
-            {/* Right: Save Project Button */}
+            {/* Right: 4-State Save Project Button Matrix (Saving... | Saved successfully | Save failed / Retry) */}
             <div className="flex items-center gap-2.5 flex-shrink-0">
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<BookmarkCheck size={13} />}
-                onClick={handleSaveProject}
-                className="text-2xs font-semibold tracking-wider uppercase px-4"
-              >
-                SAVE PROJECT
-              </Button>
+              {saveStatus === 'idle' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<BookmarkCheck size={13} />}
+                  onClick={handleSaveProject}
+                  className="text-2xs font-semibold tracking-wider uppercase px-4 cursor-pointer"
+                >
+                  SAVE PROJECT
+                </Button>
+              )}
+
+              {saveStatus === 'saving' && (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase bg-forge-surface border border-forge-border text-forge-muted cursor-not-allowed"
+                >
+                  <Loader2 size={13} className="animate-spin text-forge-blue" />
+                  <span>Saving...</span>
+                </button>
+              )}
+
+              {saveStatus === 'saved' && (
+                <button
+                  type="button"
+                  onClick={handleSaveProject}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-2xs font-semibold tracking-wider uppercase bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 cursor-pointer transition-all"
+                >
+                  <CheckCircle2 size={13} className="text-emerald-400" />
+                  <span>Saved successfully</span>
+                </button>
+              )}
+
+              {saveStatus === 'error' && (
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 text-2xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 rounded-lg">
+                    <AlertCircle size={12} />
+                    <span>Save failed</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSaveProject}
+                    className="inline-flex items-center gap-1 text-2xs font-semibold tracking-wider uppercase text-forge-white bg-forge-blue hover:bg-forge-blue-light px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-blue-glow-sm"
+                  >
+                    <RefreshCw size={11} />
+                    <span>Retry</span>
+                  </button>
+                </div>
+              )}
             </div>
 
           </div>
         </div>
+
 
         {/* ============================================================ */}
         {/* Main Tab Navigation: Horizontal desktop, scrollable mobile   */}

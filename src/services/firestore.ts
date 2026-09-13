@@ -1,5 +1,10 @@
 // ============================================================
 // CREAFTIQ FORGE — Firestore Service
+// Structure: users/{userId}/projects/{projectId}
+// Fields: projectName, originalIdea, industry, targetAudience,
+//         mainGoal, ideaDNA, brand, product, website,
+//         content, marketing, roadmap, creativeDirection,
+//         createdAt, updatedAt
 // ============================================================
 import {
   collection,
@@ -17,26 +22,27 @@ import {
   onSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { db } from './firebase'
-import type { Project, ProjectContext, ProjectOutputs, ProjectStatus } from '@/types'
-
-// ─── Helper: convert Firestore doc to Project ────────────────
-function docToProject(id: string, data: Record<string, unknown>): Project {
-  return {
-    id,
-    uid: data.uid as string,
-    name: (data.name as string) || 'Untitled Project',
-    idea: (data.idea as string) || '',
-    context: (data.context as ProjectContext) || {},
-    status: (data.status as ProjectStatus) || 'draft',
-    createdAt: (data.createdAt as { toDate?: () => Date })?.toDate?.() || new Date(),
-    updatedAt: (data.updatedAt as { toDate?: () => Date })?.toDate?.() || new Date(),
-  }
-}
+import { db, isFirebaseConfigured } from './firebase'
+import type {
+  Project,
+  ProjectContext,
+  ProjectOutputs,
+  ProjectStatus,
+  FirestoreProjectDoc,
+  IdeaDNA,
+  BrandOutput,
+  ProductOutput,
+  WebsiteOutput,
+  ContentOutput,
+  MarketingOutput,
+  RoadmapOutput,
+  CreativeDirectionOutput,
+} from '@/types'
 
 const LOCAL_PROJECTS_KEY = 'forge_local_projects'
 const LOCAL_OUTPUTS_KEY = 'forge_local_outputs'
 
+// ─── Helper: Local storage storage ───────────────────────────
 function getLocalProjects(): Project[] {
   try {
     const raw = localStorage.getItem(LOCAL_PROJECTS_KEY)
@@ -54,35 +60,113 @@ function saveLocalProjects(projects: Project[]) {
   }
 }
 
+// ─── Helper: convert Firestore doc to Project ────────────────
+function docToProject(id: string, data: Record<string, unknown>, fallbackUid = 'user_demo_1'): Project {
+  const uid = (data.uid as string) || fallbackUid
+  const name = (data.projectName as string) || (data.name as string) || 'Untitled Project'
+  const idea = (data.originalIdea as string) || (data.idea as string) || ''
+  
+  const context: ProjectContext = (data.context as ProjectContext) || {
+    name,
+    industry: (data.industry as string) || undefined,
+    targetAudience: (data.targetAudience as string) || undefined,
+    mainGoal: (data.mainGoal as string) || undefined,
+  }
+
+  const createdAt = (data.createdAt as { toDate?: () => Date })?.toDate?.() ||
+    (typeof data.createdAt === 'string' ? new Date(data.createdAt) : new Date())
+  const updatedAt = (data.updatedAt as { toDate?: () => Date })?.toDate?.() ||
+    (typeof data.updatedAt === 'string' ? new Date(data.updatedAt) : new Date())
+
+  return {
+    id,
+    uid,
+    name,
+    idea,
+    context,
+    status: (data.status as ProjectStatus) || 'complete',
+    createdAt,
+    updatedAt,
+    projectName: name,
+    originalIdea: idea,
+    industry: (data.industry as string) || context.industry,
+    targetAudience: (data.targetAudience as string) || context.targetAudience,
+    mainGoal: (data.mainGoal as string) || context.mainGoal,
+    ideaDNA: (data.ideaDNA as IdeaDNA) || undefined,
+    brand: (data.brand as BrandOutput) || undefined,
+    product: (data.product as ProductOutput) || undefined,
+    website: (data.website as WebsiteOutput) || undefined,
+    content: (data.content as ContentOutput) || undefined,
+    marketing: (data.marketing as MarketingOutput) || undefined,
+    roadmap: (data.roadmap as RoadmapOutput) || undefined,
+    creativeDirection: (data.creativeDirection as CreativeDirectionOutput) || undefined,
+  }
+}
+
 // ─── Create Project ──────────────────────────────────────────
 export async function createProject(
   uid: string,
   idea: string,
   context: ProjectContext,
 ): Promise<string> {
-  const name = context.name || idea.slice(0, 40) + (idea.length > 40 ? '...' : '')
+  const projectName = context.name || idea.slice(0, 40) + (idea.length > 40 ? '...' : '')
+  const industry = context.industry || ''
+  const targetAudience = context.targetAudience || ''
+  const mainGoal = context.mainGoal || ''
+
+  const projectPayload: Partial<FirestoreProjectDoc> & Record<string, unknown> = {
+    projectName,
+    originalIdea: idea,
+    industry,
+    targetAudience,
+    mainGoal,
+    ideaDNA: null,
+    brand: null,
+    product: null,
+    website: null,
+    content: null,
+    marketing: null,
+    roadmap: null,
+    creativeDirection: null,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    status: 'draft',
+    uid,
+    name: projectName,
+    idea,
+    context,
+  }
+
   try {
-    const ref = await addDoc(collection(db, 'projects'), {
-      uid,
-      name,
-      idea,
-      context,
-      status: 'draft' satisfies ProjectStatus,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    })
+    // 1. Primary path: users/{userId}/projects
+    const userProjectsRef = collection(db, 'users', uid, 'projects')
+    const ref = await addDoc(userProjectsRef, projectPayload)
+    
+    // Also save to root projects collection for backward compatibility if desired
+    try {
+      await setDoc(doc(db, 'projects', ref.id), { ...projectPayload, uid })
+    } catch {
+      // Ignored
+    }
+
     return ref.id
   } catch {
+    // Fallback: local demo storage
     const id = 'proj_' + Date.now()
     const newProj: Project = {
       id,
       uid,
-      name,
+      name: projectName,
       idea,
       context,
       status: 'draft',
       createdAt: new Date(),
       updatedAt: new Date(),
+      projectName,
+      originalIdea: idea,
+      industry,
+      targetAudience,
+      mainGoal,
     }
     const list = getLocalProjects()
     list.unshift(newProj)
@@ -91,16 +175,24 @@ export async function createProject(
   }
 }
 
-// ─── Get User Projects ───────────────────────────────────────
+// ─── Get User Projects (users/{userId}/projects) ─────────────
 export async function getUserProjects(uid: string): Promise<Project[]> {
   try {
-    const q = query(
-      collection(db, 'projects'),
-      where('uid', '==', uid),
-      orderBy('updatedAt', 'desc'),
-    )
+    const userProjectsRef = collection(db, 'users', uid, 'projects')
+    const q = query(userProjectsRef, orderBy('updatedAt', 'desc'))
     const snap = await getDocs(q)
-    return snap.docs.map(d => docToProject(d.id, d.data() as Record<string, unknown>))
+    if (!snap.empty) {
+      return snap.docs.map(d => docToProject(d.id, d.data() as Record<string, unknown>, uid))
+    }
+
+    // Fallback: try root projects collection
+    const rootQ = query(collection(db, 'projects'), where('uid', '==', uid), orderBy('updatedAt', 'desc'))
+    const rootSnap = await getDocs(rootQ)
+    if (!rootSnap.empty) {
+      return rootSnap.docs.map(d => docToProject(d.id, d.data() as Record<string, unknown>, uid))
+    }
+
+    return getLocalProjects().filter(p => p.uid === uid)
   } catch {
     return getLocalProjects().filter(p => p.uid === uid)
   }
@@ -112,17 +204,23 @@ export function subscribeToUserProjects(
   callback: (projects: Project[]) => void,
 ): Unsubscribe {
   try {
-    const q = query(
-      collection(db, 'projects'),
-      where('uid', '==', uid),
-      orderBy('updatedAt', 'desc'),
+    const userProjectsRef = collection(db, 'users', uid, 'projects')
+    const q = query(userProjectsRef, orderBy('updatedAt', 'desc'))
+
+    return onSnapshot(
+      q,
+      snap => {
+        if (!snap.empty) {
+          const projects = snap.docs.map(d => docToProject(d.id, d.data() as Record<string, unknown>, uid))
+          callback(projects)
+        } else {
+          getUserProjects(uid).then(callback)
+        }
+      },
+      () => {
+        callback(getLocalProjects().filter(p => p.uid === uid))
+      }
     )
-    return onSnapshot(q, snap => {
-      const projects = snap.docs.map(d => docToProject(d.id, d.data() as Record<string, unknown>))
-      callback(projects)
-    }, () => {
-      callback(getLocalProjects().filter(p => p.uid === uid))
-    })
   } catch {
     callback(getLocalProjects().filter(p => p.uid === uid))
     return () => {}
@@ -130,13 +228,89 @@ export function subscribeToUserProjects(
 }
 
 // ─── Get Single Project ──────────────────────────────────────
-export async function getProject(projectId: string): Promise<Project | null> {
+export async function getProject(
+  projectId: string,
+  uid?: string,
+): Promise<Project | null> {
   try {
-    const snap = await getDoc(doc(db, 'projects', projectId))
-    if (!snap.exists()) return null
-    return docToProject(snap.id, snap.data() as Record<string, unknown>)
+    // 1. If uid provided, check users/{userId}/projects/{projectId}
+    if (uid) {
+      const userDocRef = doc(db, 'users', uid, 'projects', projectId)
+      const userSnap = await getDoc(userDocRef)
+      if (userSnap.exists()) {
+        return docToProject(userSnap.id, userSnap.data() as Record<string, unknown>, uid)
+      }
+    }
+
+    // 2. Check root collection
+    const rootSnap = await getDoc(doc(db, 'projects', projectId))
+    if (rootSnap.exists()) {
+      return docToProject(rootSnap.id, rootSnap.data() as Record<string, unknown>, uid)
+    }
+
+    // 3. Fallback to local storage
+    return getLocalProjects().find(p => p.id === projectId) || null
   } catch {
     return getLocalProjects().find(p => p.id === projectId) || null
+  }
+}
+
+// ─── Update Project ──────────────────────────────────────────
+export async function updateProject(
+  projectId: string,
+  data: Partial<FirestoreProjectDoc> & Record<string, unknown>,
+  uid?: string,
+): Promise<void> {
+  const updatePayload = {
+    ...data,
+    updatedAt: serverTimestamp(),
+  }
+
+  let updated = false
+
+  if (uid) {
+    try {
+      const userDocRef = doc(db, 'users', uid, 'projects', projectId)
+      await updateDoc(userDocRef, updatePayload)
+      updated = true
+    } catch {
+      try {
+        const userDocRef = doc(db, 'users', uid, 'projects', projectId)
+        await setDoc(userDocRef, updatePayload, { merge: true })
+        updated = true
+      } catch {
+        // Continue to fallback
+      }
+    }
+  }
+
+  // Also update root projects collection if present
+  try {
+    const rootDocRef = doc(db, 'projects', projectId)
+    await updateDoc(rootDocRef, updatePayload)
+    updated = true
+  } catch {
+    // Ignored
+  }
+
+  // Local fallback
+  const list = getLocalProjects()
+  const p = list.find(x => x.id === projectId)
+  if (p) {
+    Object.assign(p, data, { updatedAt: new Date() })
+    saveLocalProjects(list)
+  } else if (!updated) {
+    list.unshift({
+      id: projectId,
+      uid: uid || 'user_demo_1',
+      name: (data.projectName as string) || (data.name as string) || 'Project',
+      idea: (data.originalIdea as string) || (data.idea as string) || '',
+      context: (data.context as ProjectContext) || {},
+      status: (data.status as ProjectStatus) || 'complete',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    saveLocalProjects(list)
   }
 }
 
@@ -144,86 +318,138 @@ export async function getProject(projectId: string): Promise<Project | null> {
 export async function updateProjectStatus(
   projectId: string,
   status: ProjectStatus,
+  uid?: string,
 ): Promise<void> {
-  try {
-    await updateDoc(doc(db, 'projects', projectId), {
-      status,
-      updatedAt: serverTimestamp(),
-    })
-  } catch {
-    const list = getLocalProjects()
-    const p = list.find(x => x.id === projectId)
-    if (p) {
-      p.status = status
-      p.updatedAt = new Date()
-      saveLocalProjects(list)
-    }
-  }
+  await updateProject(projectId, { status }, uid)
 }
 
 // ─── Rename Project ──────────────────────────────────────────
-export async function renameProject(projectId: string, name: string): Promise<void> {
-  try {
-    await updateDoc(doc(db, 'projects', projectId), {
-      name,
-      updatedAt: serverTimestamp(),
-    })
-  } catch {
-    const list = getLocalProjects()
-    const p = list.find(x => x.id === projectId)
-    if (p) {
-      p.name = name
-      p.updatedAt = new Date()
-      saveLocalProjects(list)
-    }
-  }
+export async function renameProject(
+  projectId: string,
+  name: string,
+  uid?: string,
+): Promise<void> {
+  await updateProject(projectId, { projectName: name, name }, uid)
 }
 
 // ─── Delete Project ──────────────────────────────────────────
-export async function deleteProject(projectId: string): Promise<void> {
+export async function deleteProject(
+  projectId: string,
+  uid?: string,
+): Promise<void> {
+  if (uid) {
+    try {
+      await deleteDoc(doc(db, 'users', uid, 'projects', projectId))
+    } catch {
+      // Continue
+    }
+  }
+
   try {
     await deleteDoc(doc(db, 'projects', projectId))
   } catch {
-    const list = getLocalProjects().filter(x => x.id !== projectId)
-    saveLocalProjects(list)
+    // Continue
   }
+
+  const list = getLocalProjects().filter(x => x.id !== projectId)
+  saveLocalProjects(list)
 }
 
-// ─── Save Project Outputs ────────────────────────────────────
+// ─── Save Project Blueprint / Outputs ────────────────────────
 export async function saveProjectOutputs(
   projectId: string,
   outputs: Partial<ProjectOutputs>,
+  uid?: string,
+  metadata?: {
+    projectName?: string
+    originalIdea?: string
+    industry?: string
+    targetAudience?: string
+    mainGoal?: string
+  },
 ): Promise<void> {
+  const fieldsToSave: Record<string, unknown> = {
+    updatedAt: serverTimestamp(),
+  }
+
+  if (metadata?.projectName) fieldsToSave.projectName = metadata.projectName
+  if (metadata?.originalIdea) fieldsToSave.originalIdea = metadata.originalIdea
+  if (metadata?.industry) fieldsToSave.industry = metadata.industry
+  if (metadata?.targetAudience) fieldsToSave.targetAudience = metadata.targetAudience
+  if (metadata?.mainGoal) fieldsToSave.mainGoal = metadata.mainGoal
+
+  if (outputs.ideaDna !== undefined) fieldsToSave.ideaDNA = outputs.ideaDna
+  if (outputs.brand !== undefined) fieldsToSave.brand = outputs.brand
+  if (outputs.product !== undefined) fieldsToSave.product = outputs.product
+  if (outputs.website !== undefined) fieldsToSave.website = outputs.website
+  if (outputs.content !== undefined) fieldsToSave.content = outputs.content
+  if (outputs.marketing !== undefined) fieldsToSave.marketing = outputs.marketing
+  if (outputs.roadmap !== undefined) fieldsToSave.roadmap = outputs.roadmap
+  if (outputs.creativeDirection !== undefined) fieldsToSave.creativeDirection = outputs.creativeDirection
+
+  let savedToFirestore = false
+
+  if (uid) {
+    try {
+      const userProjectRef = doc(db, 'users', uid, 'projects', projectId)
+      await setDoc(userProjectRef, fieldsToSave, { merge: true })
+      savedToFirestore = true
+    } catch {
+      // Continue
+    }
+  }
+
   try {
     const outputsRef = doc(db, 'projects', projectId, 'outputs', 'main')
-    await updateDoc(outputsRef, {
-      ...outputs,
-      updatedAt: serverTimestamp(),
-    }).catch(async () => {
-      await setDoc(outputsRef, {
-        ...outputs,
-        updatedAt: serverTimestamp(),
-      })
-    })
-
+    await setDoc(outputsRef, { ...outputs, updatedAt: serverTimestamp() }, { merge: true })
+    savedToFirestore = true
   } catch {
-    // Local storage
-    try {
-      const all = JSON.parse(localStorage.getItem(LOCAL_OUTPUTS_KEY) || '{}')
-      all[projectId] = { ...(all[projectId] || {}), ...outputs }
-      localStorage.setItem(LOCAL_OUTPUTS_KEY, JSON.stringify(all))
-    } catch {
-      // Ignored
-    }
+    // Ignored
+  }
+
+  try {
+    const all = JSON.parse(localStorage.getItem(LOCAL_OUTPUTS_KEY) || '{}')
+    all[projectId] = { ...(all[projectId] || {}), ...outputs }
+    localStorage.setItem(LOCAL_OUTPUTS_KEY, JSON.stringify(all))
+  } catch {
+    // Ignored
+  }
+
+  if (isFirebaseConfigured && uid && !savedToFirestore) {
+    throw new Error('Failed to persist project outputs to Firestore.')
   }
 }
 
 // ─── Get Project Outputs ─────────────────────────────────────
-export async function getProjectOutputs(projectId: string): Promise<ProjectOutputs | null> {
+export async function getProjectOutputs(
+  projectId: string,
+  uid?: string,
+): Promise<ProjectOutputs | null> {
   try {
+    if (uid) {
+      const userSnap = await getDoc(doc(db, 'users', uid, 'projects', projectId))
+      if (userSnap.exists()) {
+        const data = userSnap.data() as Record<string, unknown>
+        if (data.ideaDNA || data.brand || data.product || data.website) {
+          return {
+            ideaDna: (data.ideaDNA as IdeaDNA) || undefined,
+            brand: (data.brand as BrandOutput) || undefined,
+            product: (data.product as ProductOutput) || undefined,
+            website: (data.website as WebsiteOutput) || undefined,
+            content: (data.content as ContentOutput) || undefined,
+            marketing: (data.marketing as MarketingOutput) || undefined,
+            roadmap: (data.roadmap as RoadmapOutput) || undefined,
+            creativeDirection: (data.creativeDirection as CreativeDirectionOutput) || undefined,
+          }
+        }
+      }
+    }
+
     const snap = await getDoc(doc(db, 'projects', projectId, 'outputs', 'main'))
-    if (!snap.exists()) return null
-    return snap.data() as ProjectOutputs
+    if (snap.exists()) return snap.data() as ProjectOutputs
+
+    const all = JSON.parse(localStorage.getItem(LOCAL_OUTPUTS_KEY) || '{}')
+    return all[projectId] || null
   } catch {
     try {
       const all = JSON.parse(localStorage.getItem(LOCAL_OUTPUTS_KEY) || '{}')
@@ -238,8 +464,37 @@ export async function getProjectOutputs(projectId: string): Promise<ProjectOutpu
 export function subscribeToProjectOutputs(
   projectId: string,
   callback: (outputs: ProjectOutputs | null) => void,
+  uid?: string,
 ): Unsubscribe {
   try {
+    if (uid) {
+      return onSnapshot(
+        doc(db, 'users', uid, 'projects', projectId),
+        snap => {
+          if (snap.exists()) {
+            const data = snap.data() as Record<string, unknown>
+            if (data.ideaDNA || data.brand || data.product || data.website) {
+              callback({
+                ideaDna: (data.ideaDNA as IdeaDNA) || undefined,
+                brand: (data.brand as BrandOutput) || undefined,
+                product: (data.product as ProductOutput) || undefined,
+                website: (data.website as WebsiteOutput) || undefined,
+                content: (data.content as ContentOutput) || undefined,
+                marketing: (data.marketing as MarketingOutput) || undefined,
+                roadmap: (data.roadmap as RoadmapOutput) || undefined,
+                creativeDirection: (data.creativeDirection as CreativeDirectionOutput) || undefined,
+              })
+              return
+            }
+          }
+          getProjectOutputs(projectId, uid).then(callback)
+        },
+        () => {
+          getProjectOutputs(projectId, uid).then(callback)
+        }
+      )
+    }
+
     return onSnapshot(
       doc(db, 'projects', projectId, 'outputs', 'main'),
       snap => callback(snap.exists() ? (snap.data() as ProjectOutputs) : null),
@@ -248,7 +503,8 @@ export function subscribeToProjectOutputs(
       }
     )
   } catch {
-    getProjectOutputs(projectId).then(callback)
+    getProjectOutputs(projectId, uid).then(callback)
     return () => {}
   }
 }
+

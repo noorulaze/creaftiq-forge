@@ -4,8 +4,10 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { CheckCircle2, Sparkles } from 'lucide-react'
 import { MountainBackdrop } from '@/components/landing/MountainBackdrop'
 import { getProject, saveProjectOutputs, updateProjectStatus, createProject } from '@/services/firestore'
+import { useAuthStore } from '@/store/useAuthStore'
 import { runFullForge } from '@/services/ai'
 import type { ProjectContext } from '@/types'
+
 
 interface Stage {
   id: string
@@ -50,6 +52,7 @@ const FORGING_STAGES: Stage[] = [
 export function ForgingPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const shouldReduceMotion = useReducedMotion()
 
   const [currentStageIndex, setCurrentStageIndex] = useState(0)
@@ -76,7 +79,7 @@ export function ForgingPage() {
         let context: ProjectContext = { name: 'Creative Project' }
 
         try {
-          const project = await getProject(activeId)
+          const project = await getProject(activeId, user?.uid)
           if (project && project.idea) {
             idea = project.idea
             context = project.context || {}
@@ -104,8 +107,15 @@ export function ForgingPage() {
         if (!isMounted) return
 
         // Save outputs and update status
-        await saveProjectOutputs(activeId, outputs)
-        await updateProjectStatus(activeId, 'complete')
+        await saveProjectOutputs(activeId, outputs, user?.uid, {
+          projectName: context.name,
+          originalIdea: idea,
+          industry: context.industry,
+          targetAudience: context.targetAudience,
+          mainGoal: context.mainGoal,
+        })
+        await updateProjectStatus(activeId, 'complete', user?.uid)
+
 
         // Allow all 5 stages to display calmly before transitioning
         setTimeout(() => {

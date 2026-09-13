@@ -233,7 +233,7 @@ export function DashboardPage() {
     if (!renameTarget || !renameName.trim()) return
     setRenameLoading(true)
     try {
-      await renameProject(renameTarget.id, renameName.trim())
+      await renameProject(renameTarget.id, renameName.trim(), user?.uid)
       toast.success('Project renamed.')
       setRenameTarget(null)
     } catch {
@@ -247,7 +247,7 @@ export function DashboardPage() {
     if (!deleteTarget) return
     setDeleteLoading(true)
     try {
-      await deleteProject(deleteTarget.id)
+      await deleteProject(deleteTarget.id, user?.uid)
       toast.success('Project deleted.')
       setDeleteTarget(null)
     } catch {
@@ -256,6 +256,7 @@ export function DashboardPage() {
       setDeleteLoading(false)
     }
   }
+
 
   if (error) return <ErrorState message={error} onRetry={() => setError(null)} className="pt-24" />
 

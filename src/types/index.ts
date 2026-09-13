@@ -34,7 +34,42 @@ export interface Project {
   status: ProjectStatus
   createdAt: Date
   updatedAt: Date
+  // Full project document fields stored in users/{userId}/projects/{projectId}
+  projectName?: string
+  originalIdea?: string
+  industry?: string
+  targetAudience?: string
+  mainGoal?: string
+  ideaDNA?: IdeaDNA
+  brand?: BrandOutput
+  product?: ProductOutput
+  website?: WebsiteOutput
+  content?: ContentOutput
+  marketing?: MarketingOutput
+  roadmap?: RoadmapOutput
+  creativeDirection?: CreativeDirectionOutput
 }
+
+export interface FirestoreProjectDoc {
+  projectName: string
+  originalIdea: string
+  industry: string
+  targetAudience: string
+  mainGoal: string
+  ideaDNA: IdeaDNA | null
+  brand: BrandOutput | null
+  product: ProductOutput | null
+  website: WebsiteOutput | null
+  content: ContentOutput | null
+  marketing: MarketingOutput | null
+  roadmap: RoadmapOutput | null
+  creativeDirection: CreativeDirectionOutput | null
+  createdAt: unknown
+  updatedAt: unknown
+  status?: ProjectStatus
+  uid?: string
+}
+
 
 // ──────────────────────────────────────────────────────────────
 // Idea DNA

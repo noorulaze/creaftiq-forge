@@ -7,26 +7,22 @@ service cloud.firestore {
     // Users can only read/write their own profile document
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // ─── Projects Subcollection: users/{userId}/projects/{projectId} ──
+      // Users can only read, create, update, and delete their own projects
+      match /projects/{projectId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow update: if request.auth != null && request.auth.uid == userId;
+        allow delete: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
-    // ─── Projects Collection ──────────────────────────────────
-    // Projects can only be accessed by the user who owns them (uid field)
+    // ─── Backward compatibility for root projects collection ───
     match /projects/{projectId} {
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow create: if request.auth != null
-                    && request.resource.data.uid == request.auth.uid
-                    && request.resource.data.uid is string
-                    && request.resource.data.idea is string
-                    && request.resource.data.idea.size() >= 3
-                    && request.resource.data.idea.size() <= 2000;
-      allow update: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
-
-      // ─── Outputs Sub-collection ───────────────────────────
-      // Only the project owner can read/write outputs
+      allow read, write: if request.auth != null && (resource == null || resource.data.uid == request.auth.uid);
       match /outputs/{docId} {
-        allow read, write: if request.auth != null
-                           && get(/databases/$(database)/documents/projects/$(projectId)).data.uid == request.auth.uid;
+        allow read, write: if request.auth != null;
       }
     }
 
@@ -36,3 +32,4 @@ service cloud.firestore {
     }
   }
 }
+
