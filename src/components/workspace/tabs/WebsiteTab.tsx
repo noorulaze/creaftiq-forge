@@ -93,12 +93,51 @@ Mobile Specs: Built for 320px-390px thumb-zone comfort with zero horizontal scro
       <div className="space-y-8">
 
         {/* ============================================================ */}
-        {/* Interactive Browser Wireframe Mockup                          */}
+        {/* 01 / Website Purpose                                         */}
+        {/* ============================================================ */}
+        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
+          <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+            <div>
+              <p className="section-label mb-1">01 / WEBSITE PURPOSE</p>
+              <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
+                Digital Presence Mission & Objectives
+              </h3>
+            </div>
+            <span className="text-2xs font-mono text-forge-blue uppercase">CORE MISSION</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                PRIMARY OBJECTIVE
+              </span>
+              <p className="text-sm font-semibold text-forge-white leading-relaxed">
+                {website?.structure || 'A high-conversion narrative web presence transitioning visitors from manifesto to active engagement.'}
+              </p>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Engineered to establish immediate brand authority, articulate the product proposition without friction, and convert high-taste creators into qualified waitlist members.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <span className="text-3xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
+                CONVERSION STRATEGY
+              </span>
+              <p className="text-sm font-semibold text-forge-white leading-relaxed">
+                Single-scroll progressive disclosure from high-level manifesto to concrete interactive proof.
+              </p>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Every section delivers singular clarity, leading towards the centralized Genesis VIP waitlist onboarding gate.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 03 / Homepage Structure & 06 / Content Sections Simulator     */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-navy/90 p-5 sm:p-8">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">HOMEPAGE WIREFRAME SIMULATOR</p>
+              <p className="section-label mb-1">03 / HOMEPAGE STRUCTURE & 06 / CONTENT SECTIONS</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
                 Visual Viewport Prototype
               </h3>
@@ -263,12 +302,53 @@ Mobile Specs: Built for 320px-390px thumb-zone comfort with zero horizontal scro
         </div>
 
         {/* ============================================================ */}
-        {/* 6-Page Site Architecture Grid                                 */}
+        {/* 04 / Main CTA Specification                                   */}
+        {/* ============================================================ */}
+        <div className="rounded-2xl border border-forge-border bg-forge-navy/80 p-6 sm:p-8">
+          <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-5 flex-wrap gap-2">
+            <div>
+              <p className="section-label mb-1">04 / MAIN CTA ARCHITECTURE</p>
+              <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
+                Conversion Anchor & Button Hierarchy
+              </h3>
+            </div>
+            <span className="text-2xs font-mono text-emerald-400">CONVERSION FOCAL POINT</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="p-5 rounded-xl border border-forge-blue/30 bg-forge-blue/10">
+              <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold block mb-1">
+                PRIMARY CALL TO ACTION
+              </span>
+              <p className="text-base font-bold text-forge-white font-mono mb-2">
+                "START FORGING"
+              </p>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Direct trigger that launches the idea intake flow. High-contrast electric blue styling with glow hover states. Positioned in the global navigation bar, hero viewport, and final closing section.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-xl border border-forge-border bg-forge-surface">
+              <span className="text-3xs font-mono uppercase tracking-widest text-forge-muted font-bold block mb-1">
+                SECONDARY / SUPPORTING CTA
+              </span>
+              <p className="text-base font-bold text-forge-white font-mono mb-2">
+                "EXPLORE THE PROCESS" / "CLAIM VIP KEY"
+              </p>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Subtle outline style for visitors seeking methodology or early cohort registration before submitting a full idea.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 02 / Recommended Pages                                       */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">INFORMATION ARCHITECTURE</p>
+              <p className="section-label mb-1">02 / RECOMMENDED PAGES</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
                 6 Primary Site Pages
               </h3>
@@ -303,12 +383,12 @@ Mobile Specs: Built for 320px-390px thumb-zone comfort with zero horizontal scro
         </div>
 
         {/* ============================================================ */}
-        {/* Mobile Ergonomics & Performance Checklist                     */}
+        {/* 05 / UX Direction & Mobile Ergonomics                         */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-navy/70 p-6 sm:p-7">
           <div className="flex items-center gap-2 mb-2">
             <Smartphone size={14} className="text-emerald-400" />
-            <p className="section-label mb-0">MOBILE RESPONSIVENESS & ERGONOMICS</p>
+            <p className="section-label mb-0">05 / UX DIRECTION & MOBILE ERGONOMICS</p>
           </div>
           <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider mb-4">
             320px - 390px Mobile Viewport Standards

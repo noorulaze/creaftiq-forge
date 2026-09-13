@@ -73,7 +73,7 @@ Motion Principles: Spring physics with restrained opacity reveals.`
             <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 flex-wrap gap-2">
               <span className="text-2xs font-mono uppercase tracking-widest text-forge-blue font-bold flex items-center gap-1.5">
                 <Sparkles size={13} />
-                ATMOSPHERIC WORLD MANIFESTO
+                01 / MOOD & ATMOSPHERE
               </span>
               <span className="text-2xs font-mono text-forge-muted">
                 TASTE SPECIFICATION: NO. 01
@@ -172,12 +172,12 @@ Motion Principles: Spring physics with restrained opacity reveals.`
         </div>
 
         {/* ============================================================ */}
-        {/* Interactive Palette Directory with Click-to-Copy             */}
+        {/* 02 / Colors & Design Tokens                                  */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">COLOR PALETTE ARCHITECTURE</p>
+              <p className="section-label mb-1">02 / COLORS & DESIGN TOKENS</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
                 Click Token Swatch To Copy Hex
               </h3>
@@ -222,14 +222,14 @@ Motion Principles: Spring physics with restrained opacity reveals.`
         </div>
 
         {/* ============================================================ */}
-        {/* Typography Scale & Specimen Hierarchy                         */}
+        {/* 03 / Typography Direction                                    */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
           <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-6 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Type size={15} className="text-forge-blue" />
               <h4 className="text-xs font-mono font-bold text-forge-white uppercase tracking-wider">
-                TYPOGRAPHIC SPECIMEN SCALE
+                03 / TYPOGRAPHY DIRECTION
               </h4>
             </div>
             <span className="text-3xs font-mono text-forge-muted">
@@ -271,10 +271,81 @@ Motion Principles: Spring physics with restrained opacity reveals.`
         </div>
 
         {/* ============================================================ */}
-        {/* Aesthetic Keyword Directory                                   */}
+        {/* 04 / Image Direction & 05 / UI Direction                      */}
+        {/* ============================================================ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* 04 / Image Direction */}
+          <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                  <p className="section-label mb-1">04 / IMAGE DIRECTION</p>
+                  <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                    Visual Treatment & Photography
+                  </h3>
+                </div>
+                <span className="text-2xs font-mono text-forge-blue">CINEMATIC CRAFT</span>
+              </div>
+
+              <ul className="space-y-3 text-xs text-forge-offwhite/90 font-light leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-forge-blue mt-1.5 flex-shrink-0" />
+                  <span><strong>Atmospheric Lighting:</strong> Chiaroscuro high-contrast lighting with deep obsidian shadows and cool ambient accents.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Architectural Compositions:</strong> Uncluttered, disciplined geometry with natural textures — matte concrete, brushed metal, and dark glass.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Zero Stock Cliches:</strong> Reject generic stock photos, smiling business models, or hyper-saturated fake 3D renders.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="pt-4 mt-4 border-t border-forge-border/60 text-3xs font-mono text-forge-muted">
+              PALETTE PROFILE: MONOCHROME OBSIDIAN WITH SINGLE POINT ACCENTS
+            </div>
+          </div>
+
+          {/* 05 / UI Direction */}
+          <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                  <p className="section-label mb-1">05 / UI DIRECTION</p>
+                  <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                    Interface Craft & Ergonomics
+                  </h3>
+                </div>
+                <span className="text-2xs font-mono text-cyan-400">DESIGN SYSTEM</span>
+              </div>
+
+              <ul className="space-y-3 text-xs text-forge-offwhite/90 font-light leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Monolithic Containers:</strong> Matte graphite and navy cards with subtle 1px border dividers (`border-forge-border`).</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-forge-blue mt-1.5 flex-shrink-0" />
+                  <span><strong>Restrained Electric Glows:</strong> Reserved for interactive focal points, active tab indicators, and primary action buttons.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Fluid Spring Physics:</strong> Gentle Framer Motion transitions with instant feedback and zero laggy easing.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="pt-4 mt-4 border-t border-forge-border/60 text-3xs font-mono text-forge-muted">
+              ACCESSIBILITY: AAA CONTRAST ON OBSIDIAN CANVASES
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 06 / Brand Keywords                                          */}
         {/* ============================================================ */}
         <div className="rounded-xl border border-forge-border bg-forge-navy/60 p-5">
-          <p className="section-label mb-2">DESIGN KEYWORD DIRECTORY</p>
+          <p className="section-label mb-2">06 / BRAND KEYWORDS</p>
           <div className="flex flex-wrap gap-2 pt-1">
             {['Obsidian', 'Editorial', 'Precision', 'Architectural', 'Electric', 'Atmospheric', 'Refined', 'Monolithic', 'High Craft', 'Kinetic'].map(kw => (
               <span

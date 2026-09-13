@@ -227,114 +227,160 @@ Mode: Local Prototype Synthesis`
         </div>
 
         {/* ============================================================ */}
-        {/* Asymmetric 4 Strategic Pillars                               */}
+        {/* Core Strategic Blueprint Cards (All 7 Fields Covered)        */}
         {/* ============================================================ */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-10">
+        <div className="space-y-5 mb-10">
           
-          {/* Pillar 1: Vision (Large 7-col) */}
-          <div className="lg:col-span-7 rounded-2xl border border-forge-blue/40 bg-forge-navy/90 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden shadow-blue-glow-sm">
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-forge-blue" />
-                <p className="text-2xs font-mono uppercase tracking-widest text-forge-blue font-bold">
-                  PILLAR 01 / VISION & POSITION
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* 1. Core Idea (7-col) */}
+            <div className="lg:col-span-7 rounded-2xl border border-forge-blue/40 bg-forge-navy/90 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden shadow-blue-glow-sm">
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-forge-blue" />
+                  <p className="text-2xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                    01 / CORE IDEA
+                  </p>
+                </div>
+                <h3 className="text-lg font-bold text-forge-white tracking-tight mb-2">
+                  What You Are Building
+                </h3>
+                <p className="text-xs sm:text-sm text-forge-offwhite/90 font-light leading-relaxed mb-4">
+                  {idea || 'A distinctive multi-faceted digital launch experience designed for ambitious creators.'}
                 </p>
               </div>
-              <h3 className="text-lg font-bold text-forge-white tracking-tight mb-2">
-                Core Value Engine
+
+              <div className="pt-4 border-t border-forge-border/60 flex items-center justify-between flex-wrap gap-2 text-2xs font-mono text-forge-muted">
+                <span>CATEGORY: DIGITAL PLATFORM</span>
+                <button
+                  onClick={() => onNavigateTab('product')}
+                  className="inline-flex items-center gap-1 text-forge-blue hover:text-forge-blue-light transition-colors"
+                >
+                  <span>Explore Product Scope</span>
+                  <ArrowRight size={11} />
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Target Audience (5-col) */}
+            <div className="lg:col-span-5 rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <p className="text-2xs font-mono uppercase tracking-widest text-cyan-400 font-bold">
+                    02 / TARGET AUDIENCE
+                  </p>
+                </div>
+                <h3 className="text-base font-bold text-forge-white tracking-tight mb-2">
+                  Who It Is For
+                </h3>
+                <p className="text-xs text-forge-muted font-light leading-relaxed mb-4">
+                  {ideaDna?.audience || 'Digital founders, creative technologists, independent designers, and forward-looking studios.'}
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-forge-border/60 flex flex-wrap gap-1.5">
+                {['Primary Adopters', 'Design Community', 'Early Enthusiasts'].map(tag => (
+                  <span key={tag} className="px-2 py-0.5 rounded bg-forge-navy border border-forge-border text-3xs font-mono text-forge-white">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* 3. Problem */}
+            <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                  <p className="text-2xs font-mono uppercase tracking-widest text-red-400 font-bold">
+                    03 / THE PROBLEM
+                  </p>
+                </div>
+                <h3 className="text-base font-bold text-forge-white tracking-tight mb-2">
+                  Need & Friction Point
+                </h3>
+                <p className="text-xs sm:text-sm text-forge-muted font-light leading-relaxed mb-4">
+                  {ideaDna?.problem || 'Most creators and founders face fragmented workflows, relying on disconnected tools for design, copywriting, strategy, and engineering with no coherent single source of truth.'}
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-forge-border/60 text-2xs font-mono text-forge-muted">
+                IMPACT: REDUCES TIME-TO-MARKET FRICTION AND CREATIVE SCATTER
+              </div>
+            </div>
+
+            {/* 4. Opportunity */}
+            <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <p className="text-2xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
+                    04 / THE OPPORTUNITY
+                  </p>
+                </div>
+                <h3 className="text-base font-bold text-forge-white tracking-tight mb-2">
+                  Market Whitespace & Value
+                </h3>
+                <p className="text-xs sm:text-sm text-forge-muted font-light leading-relaxed mb-4">
+                  {ideaDna?.opportunity || 'Enormous demand exists for a design-forward workspace that synthesizes high-taste aesthetics with concrete digital launch assets, moving beyond generic AI chatbot responses.'}
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-forge-border/60 text-2xs font-mono text-emerald-400">
+                TIMING: FIRST-MOVER ADVANTAGE IN CRAFT-LED CREATIVE AI
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Unique Angle (Full Width) */}
+          <div className="rounded-2xl border border-forge-blue/30 bg-gradient-to-r from-forge-navy via-forge-surface to-forge-navy p-6 sm:p-7 flex flex-col justify-between shadow-blue-glow-sm">
+            <div>
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-forge-blue animate-pulse" />
+                  <p className="text-2xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                    05 / UNIQUE ANGLE & UNFAIR ADVANTAGE
+                  </p>
+                </div>
+                <span className="text-3xs font-mono text-forge-muted uppercase">
+                  DEVIATION FROM THE HERD
+                </span>
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-forge-white tracking-tight mb-2">
+                What Makes This Idea Uniquely Defensible
               </h3>
-              <p className="text-xs sm:text-sm text-forge-offwhite/90 font-light leading-relaxed mb-4">
-                {idea || 'A distinctive multi-faceted digital launch experience designed for ambitious creators.'}
+              <p className="text-xs sm:text-sm text-forge-offwhite/90 font-light leading-relaxed mb-4 max-w-4xl">
+                {ideaDna?.direction || 'A cohesive editorial design posture paired with turnkey execution tokens across 7 disciplines. Rather than giving vague conversational recommendations, it produces actionable blueprints and production-ready digital specs.'}
               </p>
             </div>
 
             <div className="pt-4 border-t border-forge-border/60 flex items-center justify-between flex-wrap gap-2 text-2xs font-mono text-forge-muted">
-              <span>POSITION: UNIFIED CREATIVE WORKSPACE</span>
+              <span>DIFFERENTIATOR: CRAFT OVER COMMODITIZED TEXT</span>
               <button
                 onClick={() => onNavigateTab('brand')}
                 className="inline-flex items-center gap-1 text-forge-blue hover:text-forge-blue-light transition-colors"
               >
-                <span>Inspect Brand Specs</span>
+                <span>Review Brand Positioning</span>
                 <ArrowRight size={11} />
               </button>
             </div>
           </div>
 
-          {/* Pillar 2: Target Audience (5-col) */}
-          <div className="lg:col-span-5 rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                <p className="text-2xs font-mono uppercase tracking-widest text-cyan-400 font-bold">
-                  PILLAR 02 / AUDIENCE PROFILE
-                </p>
-              </div>
-              <h3 className="text-base font-bold text-forge-white tracking-tight mb-2">
-                Target Community Archetype
-              </h3>
-              <p className="text-xs text-forge-muted font-light leading-relaxed mb-4">
-                {ideaDna?.audience || 'Digital founders, creative technologists, independent designers, and forward-looking studios.'}
-              </p>
+          {/* 6. Short Project Summary */}
+          <div className="rounded-2xl border border-forge-border bg-forge-surface/80 p-6 sm:p-7">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <span className="text-2xs font-mono uppercase tracking-widest text-forge-muted font-bold">
+                06 / SHORT PROJECT SUMMARY
+              </span>
+              <span className="text-3xs font-mono text-forge-blue uppercase">
+                EXECUTIVE SYNTHESIS
+              </span>
             </div>
-
-            <div className="pt-4 border-t border-forge-border/60 flex flex-wrap gap-1.5">
-              {['Design Leaders', 'Early Adopters', 'Independent Creators'].map(tag => (
-                <span key={tag} className="px-2 py-0.5 rounded bg-forge-navy border border-forge-border text-3xs font-mono text-forge-white">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Pillar 3: Market Advantage (5-col) */}
-          <div className="lg:col-span-5 rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <p className="text-2xs font-mono uppercase tracking-widest text-amber-400 font-bold">
-                  PILLAR 03 / WHITESPACE ADVANTAGE
-                </p>
-              </div>
-              <h3 className="text-base font-bold text-forge-white tracking-tight mb-2">
-                Strategic Differentiation
-              </h3>
-              <p className="text-xs text-forge-muted font-light leading-relaxed mb-4">
-                {ideaDna?.opportunity || 'Most products produce generic chat text. Whitespace exists for tangible, multidisciplinary launch blueprints that synthesize brand, code, and narrative.'}
-              </p>
-            </div>
-
-            <div className="pt-4 border-t border-forge-border/60 text-2xs font-mono text-amber-400/90">
-              UNFAIR ADVANTAGE: STRUCTURED MULTI-MODAL OUTPUTS
-            </div>
-          </div>
-
-          {/* Pillar 4: Strategic Trajectory (7-col) */}
-          <div className="lg:col-span-7 rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <p className="text-2xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
-                  PILLAR 04 / LAUNCH TRAJECTORY
-                </p>
-              </div>
-              <h3 className="text-base font-bold text-forge-white tracking-tight mb-2">
-                Recommended Execution Vector
-              </h3>
-              <p className="text-xs text-forge-muted font-light leading-relaxed mb-4">
-                {ideaDna?.direction || 'Single-scroll editorial website with VIP waitlist capture, staged 7-day drop sequence, and behind-the-scenes craft documentation.'}
-              </p>
-            </div>
-
-            <div className="pt-4 border-t border-forge-border/60 flex items-center justify-between flex-wrap gap-2 text-2xs font-mono text-forge-muted">
-              <span>PATH: PRIVATE BETA → CURATED COHORT → PUBLIC V1</span>
-              <button
-                onClick={() => onNavigateTab('roadmap')}
-                className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
-              >
-                <span>Open Tactical Roadmap</span>
-                <ArrowRight size={11} />
-              </button>
-            </div>
+            <p className="text-xs sm:text-sm text-forge-white/90 font-light leading-relaxed">
+              <strong className="text-forge-white font-semibold">{projectName || 'The Project'}</strong> is conceived to solve the challenge of turning fragmented thoughts into a high-caliber digital reality. By addressing the needs of {ideaDna?.audience || 'ambitious creators'} with a disciplined craft-first methodology, this blueprint unites brand, product scope, web presence, and staged go-to-market execution into one single workspace.
+            </p>
           </div>
 
         </div>

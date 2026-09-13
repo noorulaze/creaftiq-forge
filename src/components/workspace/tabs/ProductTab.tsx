@@ -80,14 +80,14 @@ Core Differentiator: Structured, actionable launch blueprints with design pedigr
       <div className="space-y-8">
 
         {/* ============================================================ */}
-        {/* Core Value & Spec Sheet Overview                              */}
+        {/* 01 / Product Concept & 02 / User Needs                        */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
           <div className="flex items-center justify-between border-b border-forge-border/60 pb-4 mb-6 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">PRODUCT SPECIFICATION SHEET</p>
+              <p className="section-label mb-1">01 / PRODUCT CONCEPT</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
-                Functional Proposition & System Scope
+                Functional Proposition & Core Scope
               </h3>
             </div>
             <span className="text-2xs font-mono text-forge-blue uppercase">
@@ -98,7 +98,7 @@ Core Differentiator: Structured, actionable launch blueprints with design pedigr
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div className="space-y-2">
               <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold">
-                PRIMARY PRODUCT DEFINITION
+                CORE CONCEPT DEFINITION
               </span>
               <p className="text-sm font-semibold text-forge-white leading-relaxed">
                 {product?.coreProduct || 'A specialized creative intelligence environment converting unstructured ideas into production-ready digital launch plans.'}
@@ -110,7 +110,7 @@ Core Differentiator: Structured, actionable launch blueprints with design pedigr
 
             <div className="space-y-2">
               <span className="text-3xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
-                UNCOMPROMISING VALUE PROPOSITION
+                VALUE PROPOSITION & ADVANTAGE
               </span>
               <p className="text-sm font-semibold text-forge-white leading-relaxed">
                 {product?.valueProposition || 'Cuts concept-to-launch blueprinting time from weeks to minutes while enforcing uncompromising visual and strategic standards.'}
@@ -143,14 +143,72 @@ Core Differentiator: Structured, actionable launch blueprints with design pedigr
         </div>
 
         {/* ============================================================ */}
-        {/* 5-Stage Interactive User Journey Flow Ribbon                 */}
+        {/* 02 / User Needs & 03 / Main Features                         */}
+        {/* ============================================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* User Needs (5-col) */}
+          <div className="lg:col-span-5 rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+              <p className="section-label mb-1">02 / USER NEEDS</p>
+              <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider mb-4">
+                Critical Pain Points Addressed
+              </h3>
+              <ul className="space-y-3 text-xs text-forge-offwhite/90 font-light leading-relaxed">
+                <li className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-forge-blue mt-1.5 flex-shrink-0" />
+                  <span><strong>Overcoming the blank canvas:</strong> Raw ideas need structured distillation without forcing users into rigid business-school spreadsheets.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Multi-disciplinary alignment:</strong> Visual brand, product spec, and marketing narrative must speak the exact same language from day one.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Immediate tactical momentum:</strong> Founders require actionable, concrete steps to test and launch rather than generic AI advice.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="pt-4 mt-4 border-t border-forge-border/60 text-2xs font-mono text-forge-muted">
+              USER PROFILE: CREATORS, FOUNDERS & DIGITAL STUDIOS
+            </div>
+          </div>
+
+          {/* Main Features (7-col) */}
+          <div className="lg:col-span-7 rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7">
+            <p className="section-label mb-1">03 / MAIN FEATURES</p>
+            <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider mb-4">
+              Core Capabilities & Tools
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3 rounded-xl border border-forge-border bg-forge-navy/60">
+                <h4 className="font-mono font-bold text-forge-white mb-1">Interactive DNA Diagnostic</h4>
+                <p className="text-2xs text-forge-muted font-light leading-relaxed">Deconstructs idea clarity, target audience archetype, and market opportunity in seconds.</p>
+              </div>
+              <div className="p-3 rounded-xl border border-forge-border bg-forge-navy/60">
+                <h4 className="font-mono font-bold text-forge-white mb-1">Multimodal Blueprint Engine</h4>
+                <p className="text-2xs text-forge-muted font-light leading-relaxed">Simultaneous generation across 7 creative and digital disciplines without fragmented prompt loops.</p>
+              </div>
+              <div className="p-3 rounded-xl border border-forge-border bg-forge-navy/60">
+                <h4 className="font-mono font-bold text-forge-white mb-1">Granular Section Calibration</h4>
+                <p className="text-2xs text-forge-muted font-light leading-relaxed">Refine or regenerate specific sections with custom instructions and instant preview updates.</p>
+              </div>
+              <div className="p-3 rounded-xl border border-forge-border bg-forge-navy/60">
+                <h4 className="font-mono font-bold text-forge-white mb-1">Actionable Staged Roadmap</h4>
+                <p className="text-2xs text-forge-muted font-light leading-relaxed">Interactive checklist tracking progress from clarification and design through build and launch.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 04 / User Journey                                            */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-navy/80 p-6 sm:p-8">
           <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">USER EXPERIENCE CONTINUUM</p>
+              <p className="section-label mb-1">04 / USER JOURNEY</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
-                End-To-End User Journey
+                End-To-End User Journey Continuum
               </h3>
             </div>
             <span className="text-2xs font-mono text-forge-muted">
@@ -191,14 +249,14 @@ Core Differentiator: Structured, actionable launch blueprints with design pedigr
         </div>
 
         {/* ============================================================ */}
-        {/* 3-Tier MVP Scope Matrix                                       */}
+        {/* 05 / MVP Feature List                                        */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">ROADMAP SCOPE ARCHITECTURE</p>
+              <p className="section-label mb-1">05 / MVP FEATURE LIST</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
-                Phased Feature Allocations
+                Phased Feature Allocations & MVP Scopes
               </h3>
             </div>
             <span className="text-2xs font-mono text-forge-muted">3 HORIZONS DEFINED</span>

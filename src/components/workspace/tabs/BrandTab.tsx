@@ -75,12 +75,34 @@ Voice & Tone: Articulate, authoritative, calm, avoiding marketing buzzwords and 
       <div className="space-y-8">
 
         {/* ============================================================ */}
-        {/* Typographic Poster Specimen                                   */}
+        {/* 01 / Brand Positioning                                       */}
+        {/* ============================================================ */}
+        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
+          <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+            <span className="text-2xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+              01 / BRAND POSITIONING
+            </span>
+            <span className="text-3xs font-mono text-forge-muted uppercase">
+              MARKET STANCE & ANCHOR
+            </span>
+          </div>
+          <div className="space-y-3">
+            <h3 className="text-lg sm:text-xl font-bold text-forge-white tracking-tight">
+              {brand?.positioning || 'The premier intelligent workspace for ambitious creators and forward-thinking studios.'}
+            </h3>
+            <p className="text-xs sm:text-sm text-forge-muted font-light leading-relaxed">
+              Positioned at the intersection of architectural discipline and digital speed. We reject superficial chatbots, instead delivering structured multi-modal launch blueprints with uncompromising creative authority.
+            </p>
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 02 / Typography Direction                                    */}
         {/* ============================================================ */}
         <div className="relative rounded-2xl border border-forge-border bg-gradient-to-b from-forge-navy/90 to-forge-surface p-6 sm:p-10 overflow-hidden shadow-2xl">
           <div className="flex items-center justify-between border-b border-forge-border/60 pb-4 mb-8 flex-wrap gap-2">
             <span className="text-2xs font-mono uppercase tracking-widest text-forge-blue font-bold">
-              TYPOGRAPHIC SPECIMEN & LOGO STUDY
+              02 / TYPOGRAPHY DIRECTION
             </span>
             <span className="text-2xs font-mono text-forge-muted">
               PAIRING: INTER DISPLAY + JETBRAINS MONO
@@ -119,12 +141,12 @@ Voice & Tone: Articulate, authoritative, calm, avoiding marketing buzzwords and 
         </div>
 
         {/* ============================================================ */}
-        {/* Interactive Color Palette Swatch Inspector                    */}
+        {/* 03 / Color Direction                                         */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">COLOR ARCHITECTURE</p>
+              <p className="section-label mb-1">03 / COLOR DIRECTION</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
                 Click Swatch To Copy Hex
               </h3>
@@ -171,7 +193,7 @@ Voice & Tone: Articulate, authoritative, calm, avoiding marketing buzzwords and 
         </div>
 
         {/* ============================================================ */}
-        {/* Verbal Identity: Voice Spectrum & What We Sound Like          */}
+        {/* 04 / Brand Personality & 05 / Brand Voice                    */}
         {/* ============================================================ */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           
@@ -180,10 +202,10 @@ Voice & Tone: Articulate, authoritative, calm, avoiding marketing buzzwords and 
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Sliders size={14} className="text-forge-blue" />
-                <p className="section-label mb-0">TONAL SPECTRUM MATRIX</p>
+                <p className="section-label mb-0">04 / BRAND PERSONALITY</p>
               </div>
               <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider mb-4">
-                Brand Personality Spectrum
+                Personality Matrix
               </h3>
 
               <div className="space-y-4 text-xs font-mono">
@@ -228,7 +250,7 @@ Voice & Tone: Articulate, authoritative, calm, avoiding marketing buzzwords and 
           <div className="lg:col-span-7 rounded-2xl border border-forge-border bg-forge-surface p-6">
             <div className="flex items-center gap-2 mb-3">
               <Volume2 size={14} className="text-cyan-400" />
-              <p className="section-label mb-0">VERBAL IDENTITY GOVERNANCE</p>
+              <p className="section-label mb-0">05 / BRAND VOICE</p>
             </div>
             <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider mb-4">
               Verbal Guidelines
@@ -261,9 +283,7 @@ Voice & Tone: Articulate, authoritative, calm, avoiding marketing buzzwords and 
 
         </div>
 
-        {/* ============================================================ */}
-        {/* Curated Taglines & Manifesto Showcase                         */}
-        {/* ============================================================ */}
+        {/* Curated Taglines & Manifesto Showcase */}
         <div className="rounded-2xl border border-forge-border bg-forge-navy/70 p-6 sm:p-7">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
@@ -300,6 +320,48 @@ Voice & Tone: Articulate, authoritative, calm, avoiding marketing buzzwords and 
                 </button>
               )
             })}
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 06 / Visual Identity Notes                                   */}
+        {/* ============================================================ */}
+        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
+          <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-5 flex-wrap gap-2">
+            <div>
+              <p className="section-label mb-1">06 / VISUAL IDENTITY NOTES</p>
+              <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
+                Design System & Aesthetic Grammar
+              </h3>
+            </div>
+            <span className="text-2xs font-mono text-forge-blue">SYSTEM GOVERNANCE</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/60">
+              <h4 className="text-xs font-mono font-bold text-forge-white uppercase mb-1.5">
+                01. Monogram & Mark
+              </h4>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Precision geometric letterforms with optical kerning. Clean silhouette that functions at 16px favicons and large billboards alike.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/60">
+              <h4 className="text-xs font-mono font-bold text-forge-white uppercase mb-1.5">
+                02. 8px Geometric Grid
+              </h4>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                All padding, typography line-heights, card margins, and icon placements conform to an 8px architectural grid for mathematical balance.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/60">
+              <h4 className="text-xs font-mono font-bold text-forge-white uppercase mb-1.5">
+                03. Lighting & Atmosphere
+              </h4>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Deep obsidian void canvas with restrained electric blue glows. Avoid saturated rainbows, harsh lasers, or cyberpunk neon tropes.
+              </p>
+            </div>
           </div>
         </div>
 

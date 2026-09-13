@@ -92,6 +92,53 @@ Notice: Local strategic model. Clearly designated as planned recommendation.`
       <div className="space-y-8">
 
         {/* ============================================================ */}
+        {/* 01 / Target Audience Specification                            */}
+        {/* ============================================================ */}
+        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
+          <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-5 flex-wrap gap-2">
+            <div>
+              <p className="section-label mb-1">01 / TARGET AUDIENCE</p>
+              <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
+                Audience Profile & Market Archetypes
+              </h3>
+            </div>
+            <span className="text-2xs font-mono text-cyan-400">QUALIFIED BUYER PROFILE</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/80">
+              <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold block mb-1">
+                PRIMARY ARCHETYPE
+              </span>
+              <h4 className="text-sm font-bold text-forge-white mb-1.5">Independent Creators & Founders</h4>
+              <p className="text-2xs text-forge-muted font-light leading-relaxed">
+                Visionary solo founders and boutique studio leads building high-craft digital products who want to launch rapidly without sacrificing design integrity.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/80">
+              <span className="text-3xs font-mono uppercase tracking-widest text-emerald-400 font-bold block mb-1">
+                KEY PAIN POINT
+              </span>
+              <h4 className="text-sm font-bold text-forge-white mb-1.5">Tool Fatigue & Scattered Focus</h4>
+              <p className="text-2xs text-forge-muted font-light leading-relaxed">
+                Tired of juggling 6 disconnected tools for strategy, branding, copywriting, and project tracking that fail to produce a unified launch direction.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/80">
+              <span className="text-3xs font-mono uppercase tracking-widest text-cyan-400 font-bold block mb-1">
+                CORE MOTIVATION
+              </span>
+              <h4 className="text-sm font-bold text-forge-white mb-1.5">Taste-Driven Execution</h4>
+              <p className="text-2xs text-forge-muted font-light leading-relaxed">
+                They value premium editorial aesthetics and want launch materials that immediately command respect from day one.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================ */}
         {/* Core Narrative Hero Banner                                   */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-gradient-to-r from-forge-navy via-forge-surface to-forge-navy p-6 sm:p-8">
@@ -115,14 +162,14 @@ Notice: Local strategic model. Clearly designated as planned recommendation.`
         </div>
 
         {/* ============================================================ */}
-        {/* Phased GTM Launch Sequence (3 Horizons)                       */}
+        {/* 03 / Launch Campaign Idea (3 Phases)                          */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
           <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">STAGED ROLLOUT STRATEGY</p>
+              <p className="section-label mb-1">03 / LAUNCH CAMPAIGN IDEA</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
-                3-Phase Go-To-Market Sequence
+                The Genesis Drop — 3-Phase Rollout Sequence
               </h3>
             </div>
             <span className="text-2xs font-mono text-forge-muted">
@@ -159,12 +206,12 @@ Notice: Local strategic model. Clearly designated as planned recommendation.`
         </div>
 
         {/* ============================================================ */}
-        {/* Channel Allocation Breakdown & Radar                          */}
+        {/* 02 / Marketing Channels Allocation                           */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
           <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">ACQUISITION CHANNELS</p>
+              <p className="section-label mb-1">02 / MARKETING CHANNELS</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
                 Effort & Channel Allocation
               </h3>
@@ -240,6 +287,75 @@ Notice: Local strategic model. Clearly designated as planned recommendation.`
                 </span>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 04 / Organic Strategy & 05 / Paid Advertising Direction       */}
+        {/* ============================================================ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* 04 / Organic Strategy */}
+          <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                  <p className="section-label mb-1">04 / ORGANIC STRATEGY</p>
+                  <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                    Community & Proof-Of-Work Loops
+                  </h3>
+                </div>
+                <span className="text-2xs font-mono text-emerald-400">UNPAID FLYWHEEL</span>
+              </div>
+              <ul className="space-y-3 text-xs text-forge-offwhite/90 font-light leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Build in Public:</strong> Share weekly behind-the-scenes architectural challenges, raw wireframes, and design decision rationales.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-forge-blue mt-1.5 flex-shrink-0" />
+                  <span><strong>Idea DNA Share Badges:</strong> Let users export their verified Idea DNA diagnostic summary to share on X and LinkedIn.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Curated VIP Invitations:</strong> Each Genesis cohort member receives 2 private access keys to gift to trusted peers.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="pt-4 mt-4 border-t border-forge-border/60 text-3xs font-mono text-forge-muted">
+              NORTH STAR: 100 HIGH-SIGNAL EVANGELISTS BEFORE PUBLIC ADVERTISING
+            </div>
+          </div>
+
+          {/* 05 / Paid Advertising Direction */}
+          <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                  <p className="section-label mb-1">05 / PAID ADVERTISING DIRECTION</p>
+                  <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                    Paid Acquisition & Retargeting
+                  </h3>
+                </div>
+                <span className="text-2xs font-mono text-forge-blue">EFFICIENCY FIRST</span>
+              </div>
+              <ul className="space-y-3 text-xs text-forge-offwhite/90 font-light leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-forge-blue mt-1.5 flex-shrink-0" />
+                  <span><strong>High-Intent Search Capture:</strong> Target high-intent queries like "creative agency launch framework", "brand sprint workshop", and "mvp scoping tool".</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Retargeting Warm Visitors:</strong> Run lightweight, high-craft video ads exclusively to visitors who spent over 60 seconds on the manifesto page.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 flex-shrink-0" />
+                  <span><strong>Zero Broad Top-of-Funnel Waste:</strong> Never run generic spray-and-pray display banners. Maintain strict CPA limits and focus on qualified creators.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="pt-4 mt-4 border-t border-forge-border/60 text-3xs font-mono text-forge-muted">
+              BUDGET RATIO: 80% ORGANIC EFFORT / 20% TARGETED RETARGETING
+            </div>
           </div>
         </div>
 

@@ -274,8 +274,8 @@ export function WorkspacePage() {
       {/* Page Title & Supporting Text Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
         <p className="section-label mb-2">FORGE WORKSPACE</p>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-forge-white uppercase leading-tight mb-2">
-          LET’S BUILD THE BLUEPRINT.
+        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-forge-white uppercase leading-tight mb-2">
+          YOUR FORGE <span className="text-gradient-blue">BLUEPRINT.</span>
         </h1>
         <p className="text-sm sm:text-base text-forge-muted font-light leading-relaxed max-w-2xl">
           Your idea now has direction. Explore the creative, digital, and launch plan.

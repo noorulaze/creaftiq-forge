@@ -21,75 +21,51 @@ interface PhaseData {
 
 const INITIAL_PHASES: PhaseData[] = [
   {
-    phase: 'PHASE 01',
-    title: 'Clarify the Idea & Market DNA',
-    objective: 'Distill the raw concept into a validated core proposition and target audience.',
+    phase: 'Phase 1: Clarify',
+    title: 'Idea DNA & Proposition',
+    objective: 'Distill the raw concept into a validated core proposition, target audience, and clear market whitespace.',
     suggestedOutput: 'Idea DNA document and 1-sentence value statement.',
     status: 'Complete',
     tasks: [
-      { id: 'p1_1', title: 'Conduct 5 target user interviews', completed: true },
+      { id: 'p1_1', title: 'Conduct target audience research and user interviews', completed: true },
       { id: 'p1_2', title: 'Define unique angle and core differentiator', completed: true },
-      { id: 'p1_3', title: 'Synthesize Idea DNA metrics in Forge', completed: true },
+      { id: 'p1_3', title: 'Synthesize Idea DNA clarity and problem-opportunity profile', completed: true },
     ],
   },
   {
-    phase: 'PHASE 02',
-    title: 'Build the Brand Identity',
-    objective: 'Establish verbal identity, naming parameters, typography, and visual rules.',
-    suggestedOutput: 'Brand Guidelines, color tokens, and tagline portfolio.',
+    phase: 'Phase 2: Design',
+    title: 'Brand Identity & Creative Direction',
+    objective: 'Establish verbal identity, color palette, typography hierarchy, and creative direction.',
+    suggestedOutput: 'Brand guidelines, design tokens, and UI layout wireframes.',
     status: 'In progress',
     tasks: [
-      { id: 'p2_1', title: 'Finalize brand name and domain registration', completed: true },
-      { id: 'p2_2', title: 'Lock 3 core color tokens and typography scale', completed: false },
-      { id: 'p2_3', title: 'Draft brand positioning statement', completed: false },
+      { id: 'p2_1', title: 'Lock brand positioning statement and tone of voice', completed: true },
+      { id: 'p2_2', title: 'Finalize 5 core design tokens and typography hierarchy', completed: false },
+      { id: 'p2_3', title: 'Create visual moodboard and UI wireframe structure', completed: false },
     ],
   },
   {
-    phase: 'PHASE 03',
-    title: 'Create the Product Scope',
-    objective: 'Lock MVP feature stack and design clean user onboarding flow.',
-    suggestedOutput: 'Functional MVP feature specification.',
+    phase: 'Phase 3: Build',
+    title: 'Product Scope & Web Presence',
+    objective: 'Develop MVP product features, digital web presence, and content launch pipeline.',
+    suggestedOutput: 'Live digital workspace, MVP features, and content engine assets.',
     status: 'Not started',
     tasks: [
-      { id: 'p3_1', title: 'Scope Phase 1 core product deliverables', completed: false },
-      { id: 'p3_2', title: 'Map 5-stage user journey from discovery to loyalty', completed: false },
-      { id: 'p3_3', title: 'Build interactive working prototype', completed: false },
+      { id: 'p3_1', title: 'Scope and implement essential MVP feature architecture', completed: false },
+      { id: 'p3_2', title: 'Build high-conversion responsive web presence', completed: false },
+      { id: 'p3_3', title: 'Produce initial launch content assets and campaign schedule', completed: false },
     ],
   },
   {
-    phase: 'PHASE 04',
-    title: 'Build the Digital Presence',
-    objective: 'Develop high-conversion narrative web experience with instant signups.',
-    suggestedOutput: 'Live responsive web application on custom domain.',
+    phase: 'Phase 4: Launch',
+    title: 'Go-To-Market & Iteration',
+    objective: 'Execute staged go-to-market release, onboard early cohort, and iterate on feedback.',
+    suggestedOutput: 'Genesis cohort drop, active community, and optimization backlog.',
     status: 'Not started',
     tasks: [
-      { id: 'p4_1', title: 'Design single-scroll manifesto homepage', completed: false },
-      { id: 'p4_2', title: 'Implement waitlist VIP capture', completed: false },
-      { id: 'p4_3', title: 'Perform 320px mobile responsiveness audit', completed: false },
-    ],
-  },
-  {
-    phase: 'PHASE 05',
-    title: 'Prepare Launch Content',
-    objective: 'Batch produce initial narrative media and launch announcement assets.',
-    suggestedOutput: '12 high-production social assets and founder case study.',
-    status: 'Not started',
-    tasks: [
-      { id: 'p5_1', title: 'Draft 3 foundational content pillar templates', completed: false },
-      { id: 'p5_2', title: 'Record 30s behind-the-scenes launch reel', completed: false },
-      { id: 'p5_3', title: 'Prepare Genesis cohort announcement graphics', completed: false },
-    ],
-  },
-  {
-    phase: 'PHASE 06',
-    title: 'Launch and Iterate',
-    objective: 'Execute staged release sequence, onboard users, and iterate on feedback.',
-    suggestedOutput: 'Active user base and post-launch optimization backlog.',
-    status: 'Not started',
-    tasks: [
-      { id: 'p6_1', title: 'Invite private beta cohort of 25 creators', completed: false },
-      { id: 'p6_2', title: 'Execute First 7-Day action sequence', completed: false },
-      { id: 'p6_3', title: 'Open public onboarding and review analytics', completed: false },
+      { id: 'p4_1', title: 'Distribute private beta access to selected early adopters', completed: false },
+      { id: 'p4_2', title: 'Execute 7-day launch announcement and acquisition sequence', completed: false },
+      { id: 'p4_3', title: 'Collect cohort feedback, review analytics, and iterate', completed: false },
     ],
   },
 ]
@@ -109,8 +85,14 @@ export function RoadmapTab({
 }: RoadmapTabProps) {
   const [phases, setPhases] = useState<PhaseData[]>(() => {
     try {
-      const stored = localStorage.getItem('forge_local_roadmap_tasks')
-      return stored ? JSON.parse(stored) : INITIAL_PHASES
+      const stored = localStorage.getItem('forge_roadmap_v2_tasks') || localStorage.getItem('forge_local_roadmap_tasks')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed) && parsed.length === 4) {
+          return parsed
+        }
+      }
+      return INITIAL_PHASES
     } catch {
       return INITIAL_PHASES
     }
@@ -140,7 +122,7 @@ export function RoadmapTab({
         }
       })
       try {
-        localStorage.setItem('forge_local_roadmap_tasks', JSON.stringify(next))
+        localStorage.setItem('forge_roadmap_v2_tasks', JSON.stringify(next))
       } catch {}
       return next
     })
@@ -166,7 +148,7 @@ export function RoadmapTab({
         }
       })
       try {
-        localStorage.setItem('forge_local_roadmap_tasks', JSON.stringify(next))
+        localStorage.setItem('forge_roadmap_v2_tasks', JSON.stringify(next))
       } catch {}
       return next
     })
@@ -178,7 +160,7 @@ export function RoadmapTab({
   function handleResetRoadmap() {
     setPhases(INITIAL_PHASES)
     try {
-      localStorage.setItem('forge_local_roadmap_tasks', JSON.stringify(INITIAL_PHASES))
+      localStorage.setItem('forge_roadmap_v2_tasks', JSON.stringify(INITIAL_PHASES))
     } catch {}
     toast.success('Roadmap reset to recommended defaults.')
   }
@@ -200,7 +182,7 @@ Tasks: ${p.tasks.map(t => `[${t.completed ? 'X' : ' '}] ${t.title}`).join(', ')}
     <BlueprintSection
       badge="TACTICAL EXECUTION ROADMAP"
       heading="FROM IDEA TO LAUNCH."
-      subheading="A practical staged implementation sequence with interactive task tracking across all six development phases."
+      subheading="A practical staged implementation sequence with interactive task tracking across all four development phases."
       copyContent={roadmapCopy}
       onRefine={onRefine}
       onRegenerate={onRegenerate}

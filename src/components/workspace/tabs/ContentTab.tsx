@@ -80,12 +80,65 @@ Short Video Hook: "Stop asking ChatGPT for generic plans. Here is what real arch
       <div className="space-y-8">
 
         {/* ============================================================ */}
-        {/* Visual Media Card Previews: Carousel, 9:16 Reel, Thread       */}
+        {/* 01 / Content Pillars                                         */}
+        {/* ============================================================ */}
+        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-8">
+          <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-5 flex-wrap gap-2">
+            <div>
+              <p className="section-label mb-1">01 / CONTENT PILLARS</p>
+              <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
+                Foundational Editorial Themes
+              </h3>
+            </div>
+            <span className="text-2xs font-mono text-forge-blue">3 STRATEGIC PILLARS</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/80">
+              <span className="text-3xs font-mono uppercase tracking-widest text-forge-blue font-bold block mb-1">
+                PILLAR 01
+              </span>
+              <h4 className="text-sm font-bold text-forge-white mb-2">
+                The Craft & Process
+              </h4>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Deep dives into design decisions, wireframe blueprints, prototypes, and genuine creative failures. Showing the unfiltered journey builds indisputable authority.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/80">
+              <span className="text-3xs font-mono uppercase tracking-widest text-emerald-400 font-bold block mb-1">
+                PILLAR 02
+              </span>
+              <h4 className="text-sm font-bold text-forge-white mb-2">
+                Cultural Perspective
+              </h4>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Provocative critiques of superficial generic AI tools versus disciplined human craft. Positions the brand as a champion of high taste and architectural precision.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-forge-border bg-forge-navy/80">
+              <span className="text-3xs font-mono uppercase tracking-widest text-cyan-400 font-bold block mb-1">
+                PILLAR 03
+              </span>
+              <h4 className="text-sm font-bold text-forge-white mb-2">
+                Genesis Member Triumphs
+              </h4>
+              <p className="text-xs text-forge-muted font-light leading-relaxed">
+                Showcasing actual creations, products, and launches forged by early cohort members. Proof of work that converts skeptical onlookers into active participants.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 02 / Social Media Ideas & 03 / Short Video Ideas              */}
         {/* ============================================================ */}
         <div className="rounded-2xl border border-forge-border bg-forge-navy/80 p-5 sm:p-8">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div>
-              <p className="section-label mb-1">VISUAL MEDIA SPECIMENS</p>
+              <p className="section-label mb-1">02 / SOCIAL MEDIA IDEAS & 03 / SHORT VIDEO IDEAS</p>
               <h3 className="text-base font-bold text-forge-white uppercase tracking-wider">
                 Production-Ready Content Formats
               </h3>
@@ -285,6 +338,106 @@ Short Video Hook: "Stop asking ChatGPT for generic plans. Here is what real arch
               </div>
             ))}
           </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 04 / Campaign Ideas & 05 / Caption Directions                */}
+        {/* ============================================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          
+          {/* 04 / Campaign Ideas (7-col) */}
+          <div className="lg:col-span-7 rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7">
+            <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+              <div>
+                <p className="section-label mb-1">04 / CAMPAIGN IDEAS</p>
+                <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                  Strategic Launch Campaigns
+                </h3>
+              </div>
+              <span className="text-2xs font-mono text-forge-blue">ACTIVATION CONCEPTS</span>
+            </div>
+
+            <div className="space-y-3.5">
+              <div className="p-3.5 rounded-xl border border-forge-border bg-forge-navy/60">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-mono font-bold text-forge-white uppercase">Campaign 01: "The Genesis Drop"</span>
+                  <span className="text-3xs font-mono text-forge-blue">SEED COHORT</span>
+                </div>
+                <p className="text-2xs text-forge-muted font-light leading-relaxed">
+                  A closed, invitation-only release granting 100 early founders personal access keys. Builds natural prestige and peer recommendation.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-forge-border bg-forge-navy/60">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-mono font-bold text-forge-white uppercase">Campaign 02: "Beyond The Chatbot"</span>
+                  <span className="text-3xs font-mono text-emerald-400">MANIFESTO PUSH</span>
+                </div>
+                <p className="text-2xs text-forge-muted font-light leading-relaxed">
+                  Side-by-side comparative breakdowns contrasting disposable prompt answers with complete 7-domain launch blueprints.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-forge-border bg-forge-navy/60">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-mono font-bold text-forge-white uppercase">Campaign 03: "Open Studio Build"</span>
+                  <span className="text-3xs font-mono text-cyan-400">ORGANIC LIVESTREAM</span>
+                </div>
+                <p className="text-2xs text-forge-muted font-light leading-relaxed">
+                  Live deconstruction of audience-submitted raw ideas into working brand systems, UI wireframes, and launch checklists.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 05 / Caption Directions (5-col) */}
+          <div className="lg:col-span-5 rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-forge-border/60 pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                  <p className="section-label mb-1">05 / CAPTION DIRECTIONS</p>
+                  <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                    Copy Guidance & Structure
+                  </h3>
+                </div>
+                <span className="text-2xs font-mono text-forge-muted">STYLE RULES</span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-3xs font-mono uppercase text-forge-blue font-bold block mb-1">
+                    HOOK FORMULA
+                  </span>
+                  <p className="text-2xs text-forge-offwhite/90 font-light leading-relaxed">
+                    Lead with a contrarian observation or craft assertion. Avoid sensational clickbait or "10x your life" rhetoric.
+                  </p>
+                </div>
+
+                <div>
+                  <span className="text-3xs font-mono uppercase text-emerald-400 font-bold block mb-1">
+                    BODY STRUCTURE
+                  </span>
+                  <p className="text-2xs text-forge-muted font-light leading-relaxed">
+                    Short 1-2 sentence paragraphs with clean line breaks. Use bullet markers (•) for specifications. Keep punctuation deliberate and sparse.
+                  </p>
+                </div>
+
+                <div>
+                  <span className="text-3xs font-mono uppercase text-cyan-400 font-bold block mb-1">
+                    CLOSING CALL TO ACTION
+                  </span>
+                  <p className="text-2xs text-forge-muted font-light leading-relaxed">
+                    Understated closing prompt directing readers to the bio link, invitation key registration, or constructive discussion in the replies.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-forge-border/60 text-3xs font-mono text-forge-muted">
+              TONE: RESTRAINED, EDITORIAL & CRAFT-CONSCIOUS
+            </div>
+          </div>
+
         </div>
 
       </div>
