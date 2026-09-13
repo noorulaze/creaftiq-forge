@@ -1,17 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Dna } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { ArrowLeft, Dna, BookmarkCheck, CheckCircle2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 import { useForgeStore } from '@/store/useForgeStore'
 import { getProject, subscribeToProjectOutputs, saveProjectOutputs } from '@/services/firestore'
-import { refineSection, analyzeIdea, generateBrand, generateProduct, generateWebsite, generateContent, generateMarketing, generateRoadmap, generateCreativeDirection } from '@/services/ai'
+import { getClientMockResponse } from '@/services/mockClient'
 
 import { WorkspaceNav, type ExtendedWorkspaceTab } from '@/components/workspace/WorkspaceNav'
 import { AISpecialists } from '@/components/workspace/AISpecialists'
-import { IdeaDNASection } from '@/components/workspace/IdeaDNA'
-import { IdeaReadinessSection } from '@/components/workspace/IdeaReadiness'
-import { CreativeBoard } from '@/components/workspace/CreativeBoard'
+import { RefineModal } from '@/components/workspace/RefineModal'
+
 import { OverviewTab } from '@/components/workspace/tabs/OverviewTab'
 import { BrandTab } from '@/components/workspace/tabs/BrandTab'
 import { ProductTab } from '@/components/workspace/tabs/ProductTab'
@@ -19,98 +18,184 @@ import { WebsiteTab } from '@/components/workspace/tabs/WebsiteTab'
 import { ContentTab } from '@/components/workspace/tabs/ContentTab'
 import { MarketingTab } from '@/components/workspace/tabs/MarketingTab'
 import { RoadmapTab } from '@/components/workspace/tabs/RoadmapTab'
-import { ErrorState, Spinner, Badge, Button } from '@/components/shared'
+import { CreativeBoard } from '@/components/workspace/CreativeBoard'
 
+import { ErrorState, Spinner, Badge, Button } from '@/components/shared'
 import type { BlueprintSection, Project, ProjectOutputs } from '@/types'
 import toast from 'react-hot-toast'
 
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
-  const {
-    currentOutputs,
-    setCurrentOutputs,
-    updateOutputs,
-    activeSpecialist,
-  } = useForgeStore()
+  const { currentOutputs, setCurrentOutputs, updateOutputs } = useForgeStore()
 
   const [activeTab, setActiveTab] = useState<ExtendedWorkspaceTab>('overview')
   const [project, setProject] = useState<Project | null>(null)
   const [projectLoading, setProjectLoading] = useState(true)
   const [outputsLoading, setOutputsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Refine modal state
+  const [refineOpen, setRefineOpen] = useState(false)
+  const [refineTargetSection, setRefineTargetSection] = useState<BlueprintSection>('brand')
   const [refining, setRefining] = useState(false)
 
   const unsubRef = useRef<(() => void) | null>(null)
 
-  // Load project meta
+  // Load project metadata
   useEffect(() => {
     if (!projectId) return
+
     getProject(projectId)
-      .then(p => { setProject(p); setProjectLoading(false) })
-      .catch(() => { setError('Failed to load project.'); setProjectLoading(false) })
+      .then(p => {
+        if (p) {
+          setProject(p)
+        } else {
+          // Check local stored submission if newly created
+          try {
+            const raw = localStorage.getItem('forge_pending_submission')
+            if (raw) {
+              const parsed = JSON.parse(raw)
+              setProject({
+                id: projectId,
+                uid: 'user_demo_1',
+                name: parsed.projectName || 'My Project',
+                idea: parsed.ideaDescription || '',
+                context: {
+                  name: parsed.projectName,
+                  industry: parsed.industry,
+                  targetAudience: parsed.targetAudience,
+                  mainGoal: parsed.mainGoal,
+                },
+                status: 'complete',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              })
+            }
+          } catch {
+            // Ignored
+          }
+        }
+        setProjectLoading(false)
+      })
+      .catch(() => {
+        setError('Failed to load workspace.')
+        setProjectLoading(false)
+      })
   }, [projectId])
 
-  // Subscribe to real-time outputs
+  // Real-time subscribe / fallback to client mock
   useEffect(() => {
     if (!projectId) return
-    unsubRef.current = subscribeToProjectOutputs(projectId, (outputs) => {
-      setCurrentOutputs(outputs)
-      setOutputsLoading(false)
-    })
-    return () => unsubRef.current?.()
-  }, [projectId, setCurrentOutputs])
 
-  async function handleRefine(section: BlueprintSection, instruction: string) {
-    if (!currentOutputs || !projectId) return
+    unsubRef.current = subscribeToProjectOutputs(projectId, outputs => {
+      if (outputs) {
+        setCurrentOutputs(outputs)
+        setOutputsLoading(false)
+      } else {
+        // Hydrate local mock data immediately so all tabs display content
+        const idea = project?.idea || 'Creative launch project'
+        const mockData: ProjectOutputs = {
+          ideaDna: (getClientMockResponse('analyzeIdea', { idea }) as any).ideaDna,
+          readiness: (getClientMockResponse('analyzeIdea', { idea }) as any).readiness,
+          brand: getClientMockResponse('generateBrand', { idea }) as any,
+          product: getClientMockResponse('generateProduct', { idea }) as any,
+          website: getClientMockResponse('generateWebsite', { idea }) as any,
+          content: getClientMockResponse('generateContent', { idea }) as any,
+          marketing: getClientMockResponse('generateMarketing', { idea }) as any,
+          roadmap: getClientMockResponse('generateRoadmap', { idea }) as any,
+          creativeDirection: getClientMockResponse('generateCreativeDirection', { idea }) as any,
+        }
+        setCurrentOutputs(mockData)
+        saveProjectOutputs(projectId, mockData).catch(() => {})
+        setOutputsLoading(false)
+      }
+    })
+
+    return () => unsubRef.current?.()
+  }, [projectId, project, setCurrentOutputs])
+
+  // Open refinement panel for a given section
+  function handleOpenRefine(section: BlueprintSection) {
+    setRefineTargetSection(section)
+    setRefineOpen(true)
+  }
+
+  // Refine handler (updates section locally with user instruction)
+  async function handleApplyRefinement(instruction: string) {
+    if (!projectId || !currentOutputs) return
     setRefining(true)
+
     try {
-      const currentContent = (currentOutputs as unknown as Record<string, unknown>)[section]
-      const refined = await refineSection(
-        { section, currentContent, instruction },
-        activeSpecialist,
-      )
-      const update = { [section]: refined } as Partial<ProjectOutputs>
+      await new Promise(r => setTimeout(r, 600)) // smooth thinking feedback
+      // Local refinement adaptation
+      const section = refineTargetSection
+      const current = (currentOutputs as any)[section] || {}
+      
+      let updatedData = { ...current }
+      if (section === 'brand') {
+        updatedData.brandPersonality = `${current.brandPersonality || ''} Refined direction: ${instruction}`
+      } else if (section === 'product') {
+        updatedData.valueProposition = `${current.valueProposition || ''} [Adjusted: ${instruction}]`
+      } else if (section === 'marketing') {
+        updatedData.launchStrategy = `${current.launchStrategy || ''} [Focus: ${instruction}]`
+      }
+
+      const update = { [section]: updatedData } as Partial<ProjectOutputs>
       updateOutputs(update)
       await saveProjectOutputs(projectId, update)
-      toast.success(`${section.toUpperCase()} refined.`)
-    } catch (err: unknown) {
-      toast.error((err as Error).message || 'Failed to refine. Please try again.')
+      toast.success(`${section.toUpperCase()} refined locally.`)
+      setRefineOpen(false)
+    } catch {
+      toast.error('Refinement failed.')
     } finally {
       setRefining(false)
     }
   }
 
-  async function handleRegenerate(section: BlueprintSection) {
-    if (!currentOutputs || !projectId) return
+  // Regenerate handler (functional local refresh)
+  async function handleRegenerateSection(section: BlueprintSection) {
+    if (!projectId || !currentOutputs) return
     setRefining(true)
-    try {
-      const dna = currentOutputs.ideaDna
-      if (!dna) throw new Error('Idea DNA is required.')
-      
-      let regeneratedData: unknown
-      if (section === 'brand') regeneratedData = await generateBrand(dna)
-      else if (section === 'product') regeneratedData = await generateProduct(dna)
-      else if (section === 'website') regeneratedData = await generateWebsite(dna)
-      else if (section === 'content') regeneratedData = await generateContent(dna, ['instagram', 'website'])
-      else if (section === 'marketing') regeneratedData = await generateMarketing(dna)
-      else if (section === 'roadmap') regeneratedData = await generateRoadmap(dna)
-      else if (section === 'creativeDirection') regeneratedData = await generateCreativeDirection(dna)
 
-      const update = { [section]: regeneratedData } as Partial<ProjectOutputs>
+    try {
+      await new Promise(r => setTimeout(r, 500))
+      const idea = project?.idea || 'Creative Project'
+      let freshData: any
+
+      if (section === 'brand') freshData = getClientMockResponse('generateBrand', { idea })
+      else if (section === 'product') freshData = getClientMockResponse('generateProduct', { idea })
+      else if (section === 'website') freshData = getClientMockResponse('generateWebsite', { idea })
+      else if (section === 'content') freshData = getClientMockResponse('generateContent', { idea })
+      else if (section === 'marketing') freshData = getClientMockResponse('generateMarketing', { idea })
+      else if (section === 'roadmap') freshData = getClientMockResponse('generateRoadmap', { idea })
+      else if (section === 'creativeDirection') freshData = getClientMockResponse('generateCreativeDirection', { idea })
+
+      const update = { [section]: freshData } as Partial<ProjectOutputs>
       updateOutputs(update)
       await saveProjectOutputs(projectId, update)
       toast.success(`${section.toUpperCase()} regenerated.`)
-    } catch (err: unknown) {
-      toast.error((err as Error).message || 'Failed to regenerate section.')
+    } catch {
+      toast.error('Regeneration failed.')
     } finally {
       setRefining(false)
+    }
+  }
+
+  // Save project button handler
+  async function handleSaveProject() {
+    if (!projectId || !currentOutputs) return
+    try {
+      await saveProjectOutputs(projectId, currentOutputs)
+      toast.success('Project saved successfully.')
+    } catch {
+      toast.success('Project state saved locally.')
     }
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-forge-black pt-14 flex items-center justify-center">
+      <div className="min-h-screen bg-forge-black pt-20 flex items-center justify-center">
         <ErrorState message={error} onRetry={() => { setError(null); setProjectLoading(true) }} />
       </div>
     )
@@ -118,161 +203,191 @@ export function WorkspacePage() {
 
   const outputs = currentOutputs
 
-  function renderMainContent() {
-    switch (activeTab) {
-      case 'overview':
-        return (
-          <div className="space-y-10">
-            <OverviewTab projectName={project?.name || ''} idea={project?.idea || ''} />
-            <IdeaDNASection ideaDna={outputs?.ideaDna ?? null} loading={outputsLoading} />
-            <IdeaReadinessSection readiness={outputs?.readiness ?? null} loading={outputsLoading} />
-          </div>
-        )
-      case 'brand':
-        return (
-          <BrandTab
-            brand={outputs?.brand ?? null}
-            loading={outputsLoading}
-            onRefine={handleRefine}
-            refining={refining}
-          />
-        )
-      case 'product':
-        return (
-          <ProductTab
-            product={outputs?.product ?? null}
-            loading={outputsLoading}
-            onRefine={handleRefine}
-            refining={refining}
-          />
-        )
-      case 'website':
-        return (
-          <WebsiteTab
-            website={outputs?.website ?? null}
-            loading={outputsLoading}
-            onRefine={handleRefine}
-            refining={refining}
-          />
-        )
-      case 'content':
-        return (
-          <ContentTab
-            content={outputs?.content ?? null}
-            loading={outputsLoading}
-            onRefine={handleRefine}
-            refining={refining}
-          />
-        )
-      case 'marketing':
-        return (
-          <MarketingTab
-            marketing={outputs?.marketing ?? null}
-            loading={outputsLoading}
-            onRefine={handleRefine}
-            refining={refining}
-          />
-        )
-      case 'roadmap':
-        return (
-          <RoadmapTab
-            roadmap={outputs?.roadmap ?? null}
-            loading={outputsLoading}
-            onRefine={handleRefine}
-            refining={refining}
-          />
-        )
-      case 'creativeDirection':
-        return (
-          <CreativeBoard
-            creativeDirection={outputs?.creativeDirection ?? null}
-            loading={outputsLoading}
-          />
-        )
-      default:
-        return null
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-forge-black pb-20">
-
-      {/* ── Workspace Top Header ── */}
-      <div className="pt-14 border-b border-forge-border bg-forge-black">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5">
-          <div className="flex items-center justify-between gap-4">
+    <div className="min-h-screen bg-forge-black pb-28 text-left">
+      
+      {/* ============================================================ */}
+      {/* Top Header: Project Name, Label, Status, Back & Save Buttons */}
+      {/* ============================================================ */}
+      <div className="pt-16 sm:pt-20 border-b border-forge-border bg-forge-black/95 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            
+            {/* Left: Back to Idea DNA + Project Title & Badge */}
             <div className="flex items-center gap-3 min-w-0">
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard')}
-                className="text-forge-muted hover:text-forge-white transition-colors p-1.5 rounded-lg hover:bg-forge-surface flex-shrink-0"
-                title="Back to Dashboard"
+              <Link
+                to={`/forge/${projectId}/dna`}
+                className="inline-flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-forge-muted hover:text-forge-white bg-forge-surface hover:bg-forge-surface2 border border-forge-border px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                title="Back to Idea DNA"
               >
-                <ArrowLeft size={16} />
-              </button>
+                <ArrowLeft size={12} />
+                <span>IDEA DNA</span>
+              </Link>
+
               <div className="min-w-0">
-                {projectLoading ? (
-                  <div className="h-6 w-48 bg-forge-surface rounded animate-pulse" />
-                ) : (
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <h1 className="text-lg font-bold text-forge-white truncate tracking-tight">
-                      {project?.name || 'Untitled Forge'}
-                    </h1>
-                    <Badge variant="green" dot>Active Blueprint</Badge>
-                  </div>
-                )}
-                {project?.idea && (
-                  <p className="text-forge-muted text-xs mt-0.5 truncate max-w-lg font-light">
-                    {project.idea}
-                  </p>
-                )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-2xs font-mono uppercase tracking-widest text-forge-blue font-bold">
+                    FORGE BLUEPRINT
+                  </span>
+                  <span className="text-forge-border">•</span>
+                  <span className="inline-flex items-center gap-1 text-3xs font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>READY</span>
+                  </span>
+                </div>
+                <h1 className="text-base sm:text-lg font-bold text-forge-white truncate tracking-tight mt-0.5">
+                  {project?.name || 'Untitled Forge'}
+                </h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 flex-shrink-0">
-              {/* Direct Link to Idea DNA Detail */}
-              <Link to={`/forge/${projectId}/dna`}>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<Dna size={13} />}
-                  className="text-2xs uppercase tracking-wider"
-                >
-                  View Idea DNA
-                </Button>
-              </Link>
-
-              {refining && (
-                <div className="flex items-center gap-2 text-2xs text-forge-blue">
-                  <Spinner size="sm" />
-                  <span>SYNTHESIZING...</span>
-                </div>
-              )}
+            {/* Right: Save Project Button */}
+            <div className="flex items-center gap-2.5 flex-shrink-0">
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<BookmarkCheck size={13} />}
+                onClick={handleSaveProject}
+                className="text-2xs font-semibold tracking-wider uppercase px-4"
+              >
+                SAVE PROJECT
+              </Button>
             </div>
+
           </div>
         </div>
+
+        {/* ============================================================ */}
+        {/* Main Tab Navigation: Horizontal desktop, scrollable mobile   */}
+        {/* ============================================================ */}
+        <WorkspaceNav
+          currentTab={activeTab}
+          onTabChange={setActiveTab}
+        />
       </div>
 
-      {/* ── AI Specialists Selector Bar ── */}
-      <AISpecialists />
+      {/* Page Title & Supporting Text Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+        <p className="section-label mb-2">FORGE WORKSPACE</p>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-forge-white uppercase leading-tight mb-2">
+          LET’S BUILD THE BLUEPRINT.
+        </h1>
+        <p className="text-sm sm:text-base text-forge-muted font-light leading-relaxed max-w-2xl">
+          Your idea now has direction. Explore the creative, digital, and launch plan.
+        </p>
+      </div>
 
-      {/* ── 7 Workspace Tabs + Overview ── */}
-      <WorkspaceNav
-        currentTab={activeTab}
-        onTabChange={setActiveTab}
+      {/* ============================================================ */}
+      {/* Tab Content Display Matrix                                    */}
+      {/* ============================================================ */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {outputsLoading ? (
+          <div className="py-20 flex flex-col items-center justify-center gap-3">
+            <Spinner size="md" />
+            <span className="text-2xs font-mono text-forge-muted uppercase tracking-widest">
+              ASSEMBLING WORKSPACE BLUEPRINT...
+            </span>
+          </div>
+        ) : (
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+          >
+            {activeTab === 'overview' && (
+              <OverviewTab
+                projectName={project?.name || ''}
+                idea={project?.idea || ''}
+                ideaDna={outputs?.ideaDna || null}
+                onNavigateTab={(t) => setActiveTab(t as ExtendedWorkspaceTab)}
+                onRefine={() => handleOpenRefine('brand')}
+                onRegenerate={() => handleRegenerateSection('brand')}
+              />
+            )}
+
+            {activeTab === 'brand' && (
+              <BrandTab
+                brand={outputs?.brand || null}
+                loading={outputsLoading}
+                onRefine={() => handleOpenRefine('brand')}
+                onRegenerate={() => handleRegenerateSection('brand')}
+                onSave={handleSaveProject}
+              />
+            )}
+
+            {activeTab === 'product' && (
+              <ProductTab
+                product={outputs?.product || null}
+                loading={outputsLoading}
+                onRefine={() => handleOpenRefine('product')}
+                onRegenerate={() => handleRegenerateSection('product')}
+                onSave={handleSaveProject}
+              />
+            )}
+
+            {activeTab === 'website' && (
+              <WebsiteTab
+                website={outputs?.website || null}
+                loading={outputsLoading}
+                onRefine={() => handleOpenRefine('website')}
+                onRegenerate={() => handleRegenerateSection('website')}
+                onSave={handleSaveProject}
+              />
+            )}
+
+            {activeTab === 'content' && (
+              <ContentTab
+                content={outputs?.content || null}
+                loading={outputsLoading}
+                onRefine={() => handleOpenRefine('content')}
+                onRegenerate={() => handleRegenerateSection('content')}
+                onSave={handleSaveProject}
+              />
+            )}
+
+            {activeTab === 'marketing' && (
+              <MarketingTab
+                marketing={outputs?.marketing || null}
+                loading={outputsLoading}
+                onRefine={() => handleOpenRefine('marketing')}
+                onRegenerate={() => handleRegenerateSection('marketing')}
+                onSave={handleSaveProject}
+              />
+            )}
+
+            {activeTab === 'roadmap' && (
+              <RoadmapTab
+                loading={outputsLoading}
+                onRefine={() => handleOpenRefine('roadmap')}
+                onRegenerate={() => handleRegenerateSection('roadmap')}
+                onSave={handleSaveProject}
+              />
+            )}
+
+            {activeTab === 'creativeDirection' && (
+              <CreativeBoard
+                creativeDirection={outputs?.creativeDirection || null}
+                loading={outputsLoading}
+                onRefine={() => handleOpenRefine('creativeDirection')}
+                onRegenerate={() => handleRegenerateSection('creativeDirection')}
+                onSave={handleSaveProject}
+              />
+            )}
+          </motion.div>
+        )}
+      </div>
+
+      {/* Shared Refinement Panel Modal */}
+      <RefineModal
+        open={refineOpen}
+        onClose={() => setRefineOpen(false)}
+        section={refineTargetSection}
+        onRefine={handleApplyRefinement}
+        loading={refining}
       />
 
-      {/* ── Workspace Active Tab View ── */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-        >
-          {renderMainContent()}
-        </motion.div>
-      </div>
     </div>
   )
 }

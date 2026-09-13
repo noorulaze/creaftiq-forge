@@ -1,97 +1,107 @@
-import { useState } from 'react'
-import { SectionCard } from '@/components/workspace/SectionCard'
-import { RefineModal } from '@/components/workspace/RefineModal'
-import { Badge, SkeletonCard } from '@/components/shared'
-import type { MarketingOutput, BlueprintSection } from '@/types'
+import { Megaphone, Target, Compass, Calendar } from 'lucide-react'
+import { BlueprintSection } from '../BlueprintSection'
+import { InsightCard } from '../InsightCard'
+import type { MarketingOutput } from '@/types'
 
 interface MarketingTabProps {
   marketing: MarketingOutput | null
   loading?: boolean
-  onRefine: (section: BlueprintSection, instruction: string) => Promise<void>
-  refining?: boolean
+  onRefine: () => void
+  onRegenerate: () => void
+  onSave?: () => void
 }
 
-export function MarketingTab({ marketing, loading = false, onRefine, refining = false }: MarketingTabProps) {
-  const [refineOpen, setRefineOpen] = useState(false)
-
-  if (loading || !marketing) {
-    return <div className="space-y-4">{Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} lines={3} />)}</div>
-  }
+export function MarketingTab({
+  marketing,
+  loading = false,
+  onRefine,
+  onRegenerate,
+  onSave,
+}: MarketingTabProps) {
+  const marketingCopy = `MARKETING LAUNCH PLAN:
+Main Message: Turn a raw idea into a clear creative and digital launch plan.
+Suggested Channels: Visual Storytelling (Instagram/X), Direct VIP Email, Long-form Case Studies.
+Launch Campaign: "Blueprint Zero" free audit and cohort sprint.
+First 7-Day Plan: Day 1 Announcement, Day 3 Early Access Keys, Day 7 Public Drop.`
 
   return (
-    <div className="space-y-4">
-      {/* Target Audience */}
-      <SectionCard label="MARKETING" title="Target Audience" onRefine={() => setRefineOpen(true)} copyContent={marketing.targetAudience}>
-        <div className="mt-2 p-4 rounded-lg bg-forge-navy border border-forge-border">
-          <p className="text-forge-white text-sm leading-relaxed">{marketing.targetAudience}</p>
+    <BlueprintSection
+      badge="GO-TO-MARKET VECTOR"
+      heading="PLAN THE LAUNCH."
+      subheading="Suggested acquisition directions, organic narratives, and tactical launch sequences. Clearly labeled as recommendations without fake conversion metrics."
+      copyContent={marketingCopy}
+      onRefine={onRefine}
+      onRegenerate={onRegenerate}
+      onSave={onSave}
+    >
+      <div className="space-y-6">
+        
+        {/* Core Message & Target Audience */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InsightCard label="01 / CORE MESSAGE" title="Main Message & Narrative" highlight>
+            <p className="text-forge-white text-xs leading-relaxed italic">
+              "{marketing?.positioning || 'An intelligent creative workspace transforming chaotic thoughts into bankable launch blueprints.'}"
+            </p>
+          </InsightCard>
+
+          <InsightCard label="02 / ACQUISITION CHANNELS" title="Suggested Channels">
+            <div className="space-y-2 text-xs text-forge-white">
+              <p>• <span className="font-semibold">Instagram & X:</span> High-contrast visual case studies & carousel breakdowns.</p>
+              <p>• <span className="font-semibold">Owned Email VIP:</span> Direct invitations delivering consistent conversion.</p>
+              <p>• <span className="font-semibold">YouTube:</span> Long-form teardowns demonstrating creative workflow depth.</p>
+            </div>
+          </InsightCard>
         </div>
-      </SectionCard>
 
-      {/* Positioning */}
-      <SectionCard label="MARKETING" title="Positioning Statement" onRefine={() => setRefineOpen(true)} copyContent={marketing.positioning}>
-        <div className="mt-2 p-4 rounded-lg bg-forge-blue/10 border border-forge-blue/20">
-          <p className="text-forge-white text-sm leading-relaxed italic">"{marketing.positioning}"</p>
+        {/* Organic vs Paid Directions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InsightCard label="03 / ORGANIC DIRECTION" title="Organic Marketing Strategy">
+            <p className="text-forge-muted text-xs leading-relaxed font-light">
+              Focus on <span className="text-forge-white font-medium">proof-of-work marketing</span>: show real project blueprints, publish teardowns of famous brands, and empower early ambassadors to share their results.
+            </p>
+          </InsightCard>
+
+          <InsightCard label="04 / PAID DIRECTION" title="Paid Marketing Strategy">
+            <p className="text-forge-muted text-xs leading-relaxed font-light">
+              Targeted creative director & founder lookalikes. Drive traffic to a high-converting interactive audit rather than cold product homepages.
+            </p>
+          </InsightCard>
         </div>
-      </SectionCard>
 
-      {/* Launch Strategy */}
-      <SectionCard label="MARKETING" title="Launch Strategy" onRefine={() => setRefineOpen(true)} copyContent={marketing.launchStrategy}>
-        <p className="text-forge-white text-sm leading-relaxed pt-2">{marketing.launchStrategy}</p>
-      </SectionCard>
+        {/* First 7-Day Action Plan */}
+        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="section-label mb-1">EXECUTION PLAYBOOK</p>
+              <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                First 7-Day Launch Action Plan
+              </h3>
+            </div>
+            <span className="text-2xs font-mono text-forge-blue uppercase">SUGGESTED SEQUENCE</span>
+          </div>
 
-      {/* Marketing Channels */}
-      <SectionCard label="MARKETING" title="Marketing Channels" onRefine={() => setRefineOpen(true)}>
-        <div className="space-y-3 pt-2">
-          {marketing.channels.map(channel => (
-            <div key={channel.name} className="flex items-start gap-3 p-4 rounded-lg bg-forge-navy border border-forge-border">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-forge-white text-sm font-semibold">{channel.name}</span>
-                  <Badge variant={channel.priority === 'primary' ? 'blue' : 'neutral'}>
-                    {channel.priority}
-                  </Badge>
+          <div className="space-y-2.5 pt-1">
+            {[
+              { day: 'DAY 01', title: 'Publish Founding Manifesto & Concept Teaser', note: 'Establish vision and open waitlist registration.' },
+              { day: 'DAY 02', title: 'Distribute Private Beta Access to 25 Target Creators', note: 'Gather direct quotes and immediate feedback.' },
+              { day: 'DAY 04', title: 'Release Video Case Study Showing Blueprint Generation', note: 'Demonstrate real workflow capabilities.' },
+              { day: 'DAY 06', title: 'Send Exclusive 24h Early Access Email to Waitlist', note: 'Reward early supporters before general release.' },
+              { day: 'DAY 07', title: 'Open Public Onboarding with Limited Daily Capacity', note: 'Maintain server headroom and high craft standards.' },
+            ].map(step => (
+              <div key={step.day} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-forge-border bg-forge-navy/80 gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xs font-mono font-bold text-forge-blue bg-forge-blue/10 px-2 py-1 rounded">
+                    {step.day}
+                  </span>
+                  <span className="text-xs font-semibold text-forge-white">{step.title}</span>
                 </div>
-                <p className="text-forge-muted text-xs leading-relaxed">{channel.rationale}</p>
+                <span className="text-2xs text-forge-muted font-light">{step.note}</span>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </SectionCard>
 
-      {/* Campaign Concepts */}
-      <SectionCard label="MARKETING" title="Campaign Concepts" onRefine={() => setRefineOpen(true)}>
-        <div className="space-y-4 pt-2">
-          {marketing.campaignConcepts.map(campaign => (
-            <div key={campaign.name} className="p-4 rounded-lg bg-forge-navy border border-forge-border">
-              <h4 className="text-forge-white text-sm font-semibold mb-1">{campaign.name}</h4>
-              <p className="text-forge-blue/80 text-xs font-medium mb-2 italic">"{campaign.hook}"</p>
-              <p className="text-forge-muted text-xs leading-relaxed mb-3">{campaign.concept}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {campaign.channels.map(c => (
-                  <span key={c} className="px-2 py-0.5 rounded bg-forge-surface border border-forge-border text-forge-muted text-xs">{c}</span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      {/* Action Plan */}
-      <SectionCard label="MARKETING" title="Initial Action Plan" onRefine={() => setRefineOpen(true)}>
-        <ol className="space-y-3 pt-2">
-          {marketing.initialActionPlan.map((action, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-forge-blue/20 border border-forge-blue/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-forge-blue text-xs font-bold">{i + 1}</span>
-              </div>
-              <span className="text-forge-white text-sm pt-0.5">{action}</span>
-            </li>
-          ))}
-        </ol>
-      </SectionCard>
-
-      <RefineModal open={refineOpen} onClose={() => setRefineOpen(false)} section="marketing"
-        onRefine={async (ins) => { await onRefine('marketing', ins); setRefineOpen(false) }} loading={refining} />
-    </div>
+      </div>
+    </BlueprintSection>
   )
 }

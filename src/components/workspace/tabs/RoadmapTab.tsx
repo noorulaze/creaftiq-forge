@@ -1,96 +1,228 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { SectionCard } from '@/components/workspace/SectionCard'
-import { RefineModal } from '@/components/workspace/RefineModal'
-import { Badge, SkeletonCard } from '@/components/shared'
-import type { RoadmapOutput, RoadmapItem, BlueprintSection } from '@/types'
+import { CheckSquare, Square, Clock } from 'lucide-react'
+import { BlueprintSection } from '../BlueprintSection'
+import toast from 'react-hot-toast'
 
-const CATEGORY_VARIANT: Record<RoadmapItem['category'], 'blue' | 'purple' | 'amber' | 'green' | 'red' | 'neutral'> = {
-  brand:     'blue',
-  product:   'purple',
-  marketing: 'amber',
-  content:   'green',
-  tech:      'red',
-  ops:       'neutral',
+interface TaskItem {
+  id: string
+  title: string
+  completed: boolean
 }
 
-function RoadmapColumn({ title, items, delay = 0 }: { title: string; items: RoadmapItem[]; delay?: number }) {
-  return (
-    <div>
-      <div className="mb-4">
-        <h3 className="text-sm font-bold tracking-widest uppercase text-forge-white">{title}</h3>
-        <div className="w-8 h-0.5 bg-forge-blue mt-2" />
-      </div>
-      <div className="space-y-3">
-        {items.map((item, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: delay + i * 0.06 }}
-            className="p-4 rounded-xl border border-forge-border bg-forge-surface hover:border-forge-border2 transition-colors"
-          >
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h4 className="text-forge-white text-sm font-semibold leading-snug">{item.title}</h4>
-              <Badge variant={CATEGORY_VARIANT[item.category]} className="flex-shrink-0 text-2xs">{item.category}</Badge>
-            </div>
-            <p className="text-forge-muted text-xs leading-relaxed mb-2">{item.description}</p>
-            {item.timeframe && (
-              <p className="text-forge-blue/70 text-xs">{item.timeframe}</p>
-            )}
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  )
+interface PhaseData {
+  phase: string
+  title: string
+  objective: string
+  suggestedOutput: string
+  status: 'Not started' | 'In progress' | 'Complete'
+  tasks: TaskItem[]
 }
+
+const INITIAL_PHASES: PhaseData[] = [
+  {
+    phase: 'PHASE 01',
+    title: 'Clarify the idea',
+    objective: 'Distill the raw concept into a validated core proposition and target audience.',
+    suggestedOutput: 'Idea DNA document and 1-sentence value statement.',
+    status: 'Complete',
+    tasks: [
+      { id: 'p1_1', title: 'Conduct 5 target user interviews', completed: true },
+      { id: 'p1_2', title: 'Define unique angle and core differentiator', completed: true },
+      { id: 'p1_3', title: 'Synthesize Idea DNA metrics in Forge', completed: true },
+    ],
+  },
+  {
+    phase: 'PHASE 02',
+    title: 'Build the brand',
+    objective: 'Establish verbal identity, naming parameters, typography, and visual rules.',
+    suggestedOutput: 'Brand Guidelines, color tokens, and tagline portfolio.',
+    status: 'In progress',
+    tasks: [
+      { id: 'p2_1', title: 'Finalize brand name and domain registration', completed: true },
+      { id: 'p2_2', title: 'Lock 3 core color tokens and typography scale', completed: false },
+      { id: 'p2_3', title: 'Draft brand positioning statement', completed: false },
+    ],
+  },
+  {
+    phase: 'PHASE 03',
+    title: 'Create the product or service',
+    objective: 'Lock MVP feature stack and design clean user onboarding flow.',
+    suggestedOutput: 'Functional MVP feature specification.',
+    status: 'Not started',
+    tasks: [
+      { id: 'p3_1', title: 'Scope Phase 1 core product deliverables', completed: false },
+      { id: 'p3_2', title: 'Map 5-stage user journey from discovery to loyalty', completed: false },
+      { id: 'p3_3', title: 'Build interactive working prototype', completed: false },
+    ],
+  },
+  {
+    phase: 'PHASE 04',
+    title: 'Build the website or digital presence',
+    objective: 'Develop high-conversion narrative web experience with instant signups.',
+    suggestedOutput: 'Live responsive web application on custom domain.',
+    status: 'Not started',
+    tasks: [
+      { id: 'p4_1', title: 'Design single-scroll manifesto homepage', completed: false },
+      { id: 'p4_2', title: 'Implement waitlist VIP capture', completed: false },
+      { id: 'p4_3', title: 'Perform 320px mobile responsiveness audit', completed: false },
+    ],
+  },
+  {
+    phase: 'PHASE 05',
+    title: 'Prepare content',
+    objective: 'Batch produce initial narrative media and launch announcement assets.',
+    suggestedOutput: '12 high-production social assets and founder case study.',
+    status: 'Not started',
+    tasks: [
+      { id: 'p5_1', title: 'Draft 3 foundational content pillar templates', completed: false },
+      { id: 'p5_2', title: 'Record 30s behind-the-scenes launch reel', completed: false },
+      { id: 'p5_3', title: 'Prepare Genesis cohort announcement graphics', completed: false },
+    ],
+  },
+  {
+    phase: 'PHASE 06',
+    title: 'Launch and improve',
+    objective: 'Execute staged release sequence, onboard users, and iterate on feedback.',
+    suggestedOutput: 'Active user base and post-launch optimization backlog.',
+    status: 'Not started',
+    tasks: [
+      { id: 'p6_1', title: 'Invite private beta cohort of 25 creators', completed: false },
+      { id: 'p6_2', title: 'Execute First 7-Day action sequence', completed: false },
+      { id: 'p6_3', title: 'Open public onboarding and review analytics', completed: false },
+    ],
+  },
+]
 
 interface RoadmapTabProps {
-  roadmap: RoadmapOutput | null
   loading?: boolean
-  onRefine: (section: BlueprintSection, instruction: string) => Promise<void>
-  refining?: boolean
+  onRefine: () => void
+  onRegenerate: () => void
+  onSave?: () => void
 }
 
-export function RoadmapTab({ roadmap, loading = false, onRefine, refining = false }: RoadmapTabProps) {
-  const [refineOpen, setRefineOpen] = useState(false)
+export function RoadmapTab({
+  loading = false,
+  onRefine,
+  onRegenerate,
+  onSave,
+}: RoadmapTabProps) {
+  const [phases, setPhases] = useState<PhaseData[]>(() => {
+    try {
+      const stored = localStorage.getItem('forge_local_roadmap_tasks')
+      return stored ? JSON.parse(stored) : INITIAL_PHASES
+    } catch {
+      return INITIAL_PHASES
+    }
+  })
 
-  if (loading || !roadmap) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="space-y-3">
-            <SkeletonCard lines={3} />
-            <SkeletonCard lines={3} />
+  function toggleTask(phaseIndex: number, taskId: string) {
+    setPhases(prev => {
+      const next = prev.map((p, pIdx) => {
+        if (pIdx !== phaseIndex) return p
+        const updatedTasks = p.tasks.map(t => (t.id === taskId ? { ...t, completed: !t.completed } : t))
+        const allDone = updatedTasks.every(t => t.completed)
+        const anyDone = updatedTasks.some(t => t.completed)
+        return {
+          ...p,
+          status: allDone ? 'Complete' : anyDone ? 'In progress' : 'Not started',
+          tasks: updatedTasks,
+        }
+      })
+      try {
+        localStorage.setItem('forge_local_roadmap_tasks', JSON.stringify(next))
+      } catch {
+        // Ignored
+      }
+      return next
+    })
+    toast.success('Roadmap updated.')
+  }
+
+  const roadmapCopy = `FROM IDEA TO LAUNCH ROADMAP:
+${phases.map(p => `${p.phase}: ${p.title} (${p.status})\nObjective: ${p.objective}\nTasks: ${p.tasks.map(t => `[${t.completed ? 'X' : ' '}] ${t.title}`).join(', ')}`).join('\n\n')}`
+
+  return (
+    <BlueprintSection
+      badge="TACTICAL EXECUTION ROADMAP"
+      heading="FROM IDEA TO LAUNCH."
+      subheading="A practical staged implementation sequence with interactive task tracking across all six development phases."
+      copyContent={roadmapCopy}
+      onRefine={onRefine}
+      onRegenerate={onRegenerate}
+      onSave={onSave}
+    >
+      <div className="space-y-4">
+        {phases.map((phase, pIdx) => (
+          <div
+            key={phase.phase}
+            className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7 transition-all duration-200"
+          >
+            {/* Phase Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-forge-border/60 gap-2 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xs font-mono font-bold text-forge-blue bg-forge-blue/10 border border-forge-blue/20 px-2.5 py-1 rounded">
+                  {phase.phase}
+                </span>
+                <h3 className="text-sm sm:text-base font-bold text-forge-white uppercase tracking-wider">
+                  {phase.title}
+                </h3>
+              </div>
+
+              <span
+                className={`text-2xs font-mono uppercase px-2.5 py-1 rounded w-fit ${
+                  phase.status === 'Complete'
+                    ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20'
+                    : phase.status === 'In progress'
+                    ? 'text-forge-blue bg-forge-blue/10 border border-forge-blue/20'
+                    : 'text-forge-muted bg-forge-navy border border-forge-border'
+                }`}
+              >
+                {phase.status}
+              </span>
+            </div>
+
+            {/* Objective & Suggested Output */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-forge-muted mb-5">
+              <div>
+                <span className="text-forge-white font-medium">Objective: </span>
+                <span className="font-light">{phase.objective}</span>
+              </div>
+              <div>
+                <span className="text-forge-white font-medium">Suggested Output: </span>
+                <span className="font-light">{phase.suggestedOutput}</span>
+              </div>
+            </div>
+
+            {/* Interactive Tasks Checklist */}
+            <div className="space-y-2 pt-2 border-t border-forge-border/40">
+              {phase.tasks.map(task => (
+                <button
+                  key={task.id}
+                  type="button"
+                  onClick={() => toggleTask(pIdx, task.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-forge-navy/80 hover:bg-forge-navy border border-forge-border transition-colors text-left group"
+                >
+                  <div className="text-forge-blue flex-shrink-0">
+                    {task.completed ? (
+                      <CheckSquare size={16} className="text-emerald-400" />
+                    ) : (
+                      <Square size={16} className="text-forge-muted group-hover:text-forge-white" />
+                    )}
+                  </div>
+                  <span
+                    className={`text-xs transition-colors ${
+                      task.completed ? 'text-forge-muted line-through' : 'text-forge-white'
+                    }`}
+                  >
+                    {task.title}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         ))}
       </div>
-    )
-  }
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="section-label mb-1">LAUNCH ROADMAP</p>
-          <h2 className="text-xl font-bold text-forge-white tracking-tight">Your Action Plan</h2>
-        </div>
-        <button
-          onClick={() => setRefineOpen(true)}
-          className="text-xs text-forge-blue hover:text-forge-blue-light transition-colors"
-        >
-          Refine Roadmap
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <RoadmapColumn title="NOW"  items={roadmap.now}  delay={0}    />
-        <RoadmapColumn title="NEXT" items={roadmap.next} delay={0.1}  />
-        <RoadmapColumn title="LATER" items={roadmap.later} delay={0.2} />
-      </div>
-
-      <RefineModal open={refineOpen} onClose={() => setRefineOpen(false)} section="roadmap"
-        onRefine={async (ins) => { await onRefine('roadmap', ins); setRefineOpen(false) }} loading={refining} />
-    </div>
+    </BlueprintSection>
   )
 }

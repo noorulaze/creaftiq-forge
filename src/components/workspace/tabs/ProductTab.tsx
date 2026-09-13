@@ -1,93 +1,107 @@
-import { useState } from 'react'
-import { SectionCard } from '@/components/workspace/SectionCard'
-import { RefineModal } from '@/components/workspace/RefineModal'
-import { Badge, SkeletonCard } from '@/components/shared'
-import type { ProductOutput, BlueprintSection } from '@/types'
-import { cn } from '@/utils/cn'
+import { Check } from 'lucide-react'
+import { BlueprintSection } from '../BlueprintSection'
+import { InsightCard } from '../InsightCard'
+import type { ProductOutput } from '@/types'
 
 interface ProductTabProps {
   product: ProductOutput | null
   loading?: boolean
-  onRefine: (section: BlueprintSection, instruction: string) => Promise<void>
-  refining?: boolean
+  onRefine: () => void
+  onRegenerate: () => void
+  onSave?: () => void
 }
 
-const priorityVariant = { high: 'red', medium: 'amber', low: 'green' } as const
-
-export function ProductTab({ product, loading = false, onRefine, refining = false }: ProductTabProps) {
-  const [refineOpen, setRefineOpen] = useState(false)
-
-  if (loading || !product) {
-    return <div className="space-y-4">{Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} lines={3} />)}</div>
-  }
+export function ProductTab({
+  product,
+  loading = false,
+  onRefine,
+  onRegenerate,
+  onSave,
+}: ProductTabProps) {
+  const productCopy = `PRODUCT BLUEPRINT:
+Concept: ${product?.coreProduct || ''}
+Value Proposition: ${product?.valueProposition || ''}
+User Experience: Minimalist, friction-free onboarding, fast execution.
+Differentiator: Deep curation and community integration over bloated catalogs.`
 
   return (
-    <div className="space-y-4">
-      {/* Core Product */}
-      <SectionCard label="PRODUCT" title="Core Product" onRefine={() => setRefineOpen(true)} copyContent={product.coreProduct}>
-        <p className="text-forge-white text-base leading-relaxed font-medium pt-2">{product.coreProduct}</p>
-      </SectionCard>
+    <BlueprintSection
+      badge="ARCHITECTURE & VALUE PROPOSITION"
+      heading="SHAPE THE PRODUCT."
+      subheading="Define the functional scope, MVP priority stack, and core differentiator without unsupported business claims."
+      copyContent={productCopy}
+      onRefine={onRefine}
+      onRegenerate={onRegenerate}
+      onSave={onSave}
+    >
+      <div className="space-y-6">
+        
+        {/* Top Cards: Concept & Value Prop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InsightCard label="01 / PRODUCT CONCEPT" title="Product Concept" highlight>
+            <p className="text-forge-white text-xs leading-relaxed">
+              {product?.coreProduct || 'A focused product suite offering curated quality and intentional design.'}
+            </p>
+          </InsightCard>
 
-      {/* Target Users */}
-      <SectionCard label="PRODUCT" title="Target Users" onRefine={() => setRefineOpen(true)}>
-        <div className="flex flex-wrap gap-2 pt-2">
-          {product.targetUsers.map(user => (
-            <span key={user} className="px-3 py-1.5 rounded-full bg-forge-navy border border-forge-border text-forge-white text-xs font-medium">
-              {user}
-            </span>
-          ))}
+          <InsightCard label="02 / VALUE PROPOSITION" title="User Problem & Solution">
+            <p className="text-forge-white text-xs leading-relaxed">
+              {product?.valueProposition || 'Solves fragmented, low-signal workflows by giving creators a dedicated workspace.'}
+            </p>
+          </InsightCard>
         </div>
-      </SectionCard>
 
-      {/* Value Proposition */}
-      <SectionCard label="PRODUCT" title="Value Proposition" onRefine={() => setRefineOpen(true)} copyContent={product.valueProposition}>
-        <div className="mt-2 p-4 rounded-lg bg-forge-blue/10 border border-forge-blue/20">
-          <p className="text-forge-white text-sm leading-relaxed">{product.valueProposition}</p>
+        {/* UX Direction & Possible Differentiator */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InsightCard label="03 / EXPERIENCE" title="User Experience Direction">
+            <p className="text-forge-white text-xs leading-relaxed">
+              Friction-free, single-screen clarity. High keyboard navigation support, calm dark aesthetic, and immediate visual confirmation.
+            </p>
+          </InsightCard>
+
+          <InsightCard label="04 / EDGE" title="Possible Differentiator">
+            <p className="text-forge-white text-xs leading-relaxed">
+              Deep, structured multi-disciplinary output (Brand, Product, Digital, Launch) rather than conversational chat bubbles.
+            </p>
+          </InsightCard>
         </div>
-      </SectionCard>
 
-      {/* Core Features */}
-      <SectionCard label="PRODUCT" title="Core Features" onRefine={() => setRefineOpen(true)}>
-        <div className="space-y-3 pt-2">
-          {product.coreFeatures.map((feature) => (
-            <div key={feature.name} className="flex items-start gap-3 p-4 rounded-lg bg-forge-navy border border-forge-border">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-forge-white text-sm font-semibold">{feature.name}</span>
-                  <Badge variant={priorityVariant[feature.priority]}>{feature.priority}</Badge>
-                </div>
-                <p className="text-forge-muted text-xs leading-relaxed">{feature.description}</p>
-              </div>
+        {/* MVP Feature Checklist */}
+        <div className="rounded-2xl border border-forge-border bg-forge-surface p-6 sm:p-7">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="section-label mb-1">MVP SCOPE CHECKLIST</p>
+              <h3 className="text-sm font-bold text-forge-white uppercase tracking-wider">
+                Flagship Features for Phase 1
+              </h3>
             </div>
-          ))}
-        </div>
-      </SectionCard>
+            <span className="text-2xs font-mono text-forge-blue uppercase">RECOMMENDED MVP</span>
+          </div>
 
-      {/* User Journey */}
-      <SectionCard label="PRODUCT" title="User Journey" onRefine={() => setRefineOpen(true)}>
-        <div className="space-y-3 pt-2">
-          {product.userJourney.map((step, i) => (
-            <div key={i} className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="w-7 h-7 rounded-full bg-forge-blue/20 border border-forge-blue/30 flex items-center justify-center flex-shrink-0">
-                  <span className="text-forge-blue text-xs font-bold">{i + 1}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            {[
+              { name: 'Core Flagship Suite', desc: 'The signature primary offering executed to the highest standard.' },
+              { name: 'Early Access & Waitlist Hub', desc: 'Direct member registration with custom invitation codes.' },
+              { name: 'Craft & Process Documentation', desc: 'Behind-the-scenes transparency building organic authority.' },
+              { name: 'Member Community Drops', desc: 'Time-boxed releases that cultivate genuine momentum.' },
+            ].map((feat) => (
+              <div
+                key={feat.name}
+                className="flex items-start gap-3 p-3.5 rounded-xl border border-forge-border bg-forge-navy/80"
+              >
+                <div className="w-5 h-5 rounded bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0 mt-0.5">
+                  <Check size={12} />
                 </div>
-                {i < product.userJourney.length - 1 && <div className="w-px h-full bg-forge-border mt-1" />}
-              </div>
-              <div className="pb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-forge-white text-sm font-semibold">{step.stage}</span>
-                  <span className="text-forge-muted text-xs">{step.emotion}</span>
+                <div>
+                  <h4 className="text-xs font-semibold text-forge-white">{feat.name}</h4>
+                  <p className="text-2xs text-forge-muted font-light leading-relaxed mt-0.5">{feat.desc}</p>
                 </div>
-                <p className="text-forge-muted text-xs leading-relaxed">{step.action}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </SectionCard>
 
-      <RefineModal open={refineOpen} onClose={() => setRefineOpen(false)} section="product"
-        onRefine={async (ins) => { await onRefine('product', ins); setRefineOpen(false) }} loading={refining} />
-    </div>
+      </div>
+    </BlueprintSection>
   )
 }

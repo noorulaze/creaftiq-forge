@@ -1,110 +1,147 @@
-import { useState } from 'react'
-import { SectionCard } from '@/components/workspace/SectionCard'
-import { RefineModal } from '@/components/workspace/RefineModal'
-import { Badge, SkeletonCard } from '@/components/shared'
-import type { BrandOutput, BlueprintSection } from '@/types'
+import { BlueprintSection } from '../BlueprintSection'
+import { InsightCard } from '../InsightCard'
+import type { BrandOutput } from '@/types'
 
 interface BrandTabProps {
   brand: BrandOutput | null
   loading?: boolean
-  onRefine: (section: BlueprintSection, instruction: string) => Promise<void>
-  refining?: boolean
+  onRefine: () => void
+  onRegenerate: () => void
+  onSave?: () => void
 }
 
-export function BrandTab({ brand, loading = false, onRefine, refining = false }: BrandTabProps) {
-  const [refineOpen, setRefineOpen] = useState(false)
-  const [refineTarget, setRefineTarget] = useState<BlueprintSection>('brand')
-
-  if (loading || !brand) {
-    return (
-      <div className="space-y-4">
-        {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} lines={3} />)}
-      </div>
-    )
-  }
-
-  function openRefine(section: BlueprintSection) {
-    setRefineTarget(section)
-    setRefineOpen(true)
-  }
+export function BrandTab({
+  brand,
+  loading = false,
+  onRefine,
+  onRegenerate,
+  onSave,
+}: BrandTabProps) {
+  const brandCopy = `BRAND BLUEPRINT:
+Positioning: ${brand?.positioning || ''}
+Personality: ${brand?.brandPersonality || ''}
+Voice: Confident, culturally rooted, and editorial. Speaks directly with craft authority.
+Colors: Primary ${brand?.colorDirection.primary || '#0A0A0F'}, Secondary ${brand?.colorDirection.secondary || '#F8F9FA'}, Accent ${brand?.colorDirection.accent || '#2563EB'}
+Typography: ${brand?.typographyDirection || ''}`
 
   return (
-    <div className="space-y-4">
-      {/* Name Direction */}
-      <SectionCard
-        label="BRAND"
-        title="Name Direction"
-        onRefine={() => openRefine('brand')}
-        copyContent={brand.nameDirection.join(', ')}
-      >
-        <div className="flex flex-wrap gap-2 pt-2">
-          {brand.nameDirection.map((name) => (
-            <span key={name} className="px-4 py-2 rounded-full border border-forge-border bg-forge-navy text-forge-white text-sm font-medium hover:border-forge-blue/40 transition-colors cursor-default">
-              {name}
-            </span>
-          ))}
-        </div>
-      </SectionCard>
-
-      {/* Tagline Ideas */}
-      <SectionCard label="BRAND" title="Tagline Ideas" onRefine={() => openRefine('brand')} copyContent={brand.taglineIdeas.join('\n')}>
-        <div className="space-y-3 pt-2">
-          {brand.taglineIdeas.map((tagline) => (
-            <div key={tagline} className="flex items-center gap-3 p-3 rounded-lg bg-forge-navy border border-forge-border group">
-              <span className="text-forge-blue/60 text-sm font-mono">"</span>
-              <p className="text-forge-white text-sm flex-1 italic">{tagline}</p>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      {/* Brand Personality */}
-      <SectionCard label="BRAND" title="Brand Personality" onRefine={() => openRefine('brand')} copyContent={brand.brandPersonality}>
-        <p className="text-forge-white text-sm leading-relaxed pt-2">{brand.brandPersonality}</p>
-      </SectionCard>
-
-      {/* Positioning */}
-      <SectionCard label="BRAND" title="Positioning" onRefine={() => openRefine('brand')} copyContent={brand.positioning}>
-        <p className="text-forge-white text-sm leading-relaxed pt-2">{brand.positioning}</p>
-      </SectionCard>
-
-      {/* Visual Direction */}
-      <SectionCard label="BRAND" title="Visual Direction" onRefine={() => openRefine('brand')} copyContent={brand.visualDirection}>
-        <p className="text-forge-white text-sm leading-relaxed pt-2">{brand.visualDirection}</p>
-      </SectionCard>
-
-      {/* Color Direction */}
-      <SectionCard label="BRAND" title="Color Direction" onRefine={() => openRefine('brand')}>
-        <div className="pt-2 space-y-3">
-          <div className="flex flex-wrap gap-3">
-            {[
-              { label: 'Primary', color: brand.colorDirection.primary },
-              { label: 'Secondary', color: brand.colorDirection.secondary },
-              { label: 'Accent', color: brand.colorDirection.accent },
-            ].map(({ label, color }) => (
-              <div key={label} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-forge-navy border border-forge-border">
-                <div className="w-4 h-4 rounded-full border border-forge-border" style={{ background: color }} />
-                <span className="text-xs text-forge-muted">{label}:</span>
-                <span className="text-xs text-forge-white font-mono">{color}</span>
+    <BlueprintSection
+      badge="IDENTITY & TONAL PRESENCE"
+      heading="BUILD THE BRAND."
+      subheading="Establish the memorable essence, visual vocabulary, and verbal identity of your project."
+      copyContent={brandCopy}
+      onRefine={onRefine}
+      onRegenerate={onRegenerate}
+      onSave={onSave}
+    >
+      <div className="space-y-8">
+        
+        {/* Visual Brand Direction Board */}
+        <div className="rounded-2xl border border-forge-border/80 bg-forge-navy/90 p-6 sm:p-8">
+          <p className="section-label mb-4">VISUAL BRAND DIRECTION BOARD</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Color Swatches */}
+            <div className="space-y-3">
+              <span className="text-2xs font-mono uppercase text-forge-muted tracking-wider">
+                COLOR PALETTE
+              </span>
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-12 h-12 rounded-xl border border-forge-border bg-[#0A0A0F]" />
+                  <span className="text-3xs font-mono text-forge-muted">#0A0A0F</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-12 h-12 rounded-xl border border-forge-border bg-[#2563EB]" />
+                  <span className="text-3xs font-mono text-forge-muted">#2563EB</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-12 h-12 rounded-xl border border-forge-border bg-[#F8F9FA]" />
+                  <span className="text-3xs font-mono text-forge-muted">#F8F9FA</span>
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Typography Samples */}
+            <div className="space-y-3">
+              <span className="text-2xs font-mono uppercase text-forge-muted tracking-wider">
+                TYPOGRAPHY SAMPLES
+              </span>
+              <div className="space-y-1">
+                <p className="text-lg font-bold tracking-tight text-forge-white">
+                  EDITORIAL HEADLINE
+                </p>
+                <p className="text-xs text-forge-muted font-light">
+                  Inter Display / Geometric Mono Accents
+                </p>
+              </div>
+            </div>
+
+            {/* Abstract Placeholder & Mood */}
+            <div className="space-y-3">
+              <span className="text-2xs font-mono uppercase text-forge-muted tracking-wider">
+                ABSTRACT VISUAL MOOD
+              </span>
+              <div className="h-14 rounded-xl border border-forge-border/80 bg-gradient-to-r from-forge-navy via-forge-surface to-forge-navy flex items-center justify-center text-2xs font-mono text-forge-muted">
+                MINIMAL • OBSIDIAN • TEXTURAL GRAIN
+              </div>
+            </div>
+
           </div>
-          <p className="text-forge-muted text-sm leading-relaxed">{brand.colorDirection.rationale}</p>
         </div>
-      </SectionCard>
 
-      {/* Typography */}
-      <SectionCard label="BRAND" title="Typography Direction" onRefine={() => openRefine('brand')} copyContent={brand.typographyDirection}>
-        <p className="text-forge-white text-sm leading-relaxed pt-2">{brand.typographyDirection}</p>
-      </SectionCard>
+        {/* Structured Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <InsightCard label="01 / POSITIONING" title="Brand Positioning" highlight>
+            <p className="text-forge-white text-xs leading-relaxed">
+              {brand?.positioning || 'The premier contemporary standard designed for forward-thinking audiences.'}
+            </p>
+          </InsightCard>
 
-      <RefineModal
-        open={refineOpen}
-        onClose={() => setRefineOpen(false)}
-        section={refineTarget}
-        onRefine={async (instruction) => { await onRefine(refineTarget, instruction); setRefineOpen(false) }}
-        loading={refining}
-      />
-    </div>
+          <InsightCard label="02 / PERSONALITY" title="Brand Personality">
+            <p className="text-forge-white text-xs leading-relaxed">
+              {brand?.brandPersonality || 'Confident, refined, and culturally grounded with editorial precision.'}
+            </p>
+          </InsightCard>
+
+          <InsightCard label="03 / VOICE" title="Brand Voice">
+            <p className="text-forge-white text-xs leading-relaxed">
+              Direct, articulate, and honest. Avoids corporate puffery; speaks as a peer with craft authority.
+            </p>
+          </InsightCard>
+
+          <InsightCard label="04 / COLOR DIRECTION" title="Suggested Color Direction">
+            <p className="text-forge-white text-xs leading-relaxed">
+              {brand?.colorDirection.rationale || 'Deep obsidian foundation creates gravitas; off-white balances legibility; electric blue punctuates key moments.'}
+            </p>
+          </InsightCard>
+
+          <InsightCard label="05 / TYPOGRAPHY DIRECTION" title="Typography Direction">
+            <p className="text-forge-white text-xs leading-relaxed">
+              {brand?.typographyDirection || 'Condensed sans-serif for high-impact headlines paired with legible geometric body weights.'}
+            </p>
+          </InsightCard>
+
+          <InsightCard label="06 / LOGO & KEYWORDS" title="Logo Direction & Keywords">
+            <div className="space-y-3">
+              <p className="text-xs text-forge-muted leading-relaxed">
+                Monolithic lettermark geometry with high-contrast negative space.
+              </p>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {['Craft', 'Identity', 'Precision', 'Atmospheric', 'Modern'].map(kw => (
+                  <span key={kw} className="px-2 py-0.5 rounded bg-forge-navy border border-forge-border text-2xs font-mono text-forge-white">
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </InsightCard>
+
+        </div>
+
+      </div>
+    </BlueprintSection>
   )
 }
